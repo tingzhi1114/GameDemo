@@ -2,12 +2,15 @@
 /// 全局枚举定义
 /// </summary>
 
-// 旬（上旬/中旬/下旬）
-public enum PeriodEnum
+// 时段（一天分为6个时段）
+public enum TimePeriodEnum
 {
-    Early,  // 上旬
-    Mid,    // 中旬
-    Late    // 下旬
+    DeadOfNight,    // 深夜
+    EarlyMorning,   // 凌晨
+    Morning,        // 上午
+    Noon,           // 中午
+    Afternoon,      // 下午
+    Evening         // 晚上
 }
 
 // 地点类型

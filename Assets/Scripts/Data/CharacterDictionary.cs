@@ -3,22 +3,8 @@ using System.Collections.Generic;
 /// <summary>
 /// 角色数据字典——存放所有角色
 /// </summary>
-public class CharacterDictionary
+public class CharacterDictionary : Singleton<CharacterDictionary>
 {
-    // 单例
-    public static CharacterDictionary Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = new CharacterDictionary();
-            }
-            return instance;
-        }
-    }
-    private static CharacterDictionary instance;
-
     // 所有角色（key=角色ID）
     private Dictionary<int, CharacterData> all_characters;
 
@@ -42,67 +28,28 @@ public class CharacterDictionary
                         { AttributeTypeEnum.Physique, 50f },
                         { AttributeTypeEnum.Luck, 50f }
                     },
-                    current_location_id: 1
+                    current_location_id: 1,
+                    current_scene_id: 1
                 )
             },
-
             {
                 2,
                 new CharacterData(
                     id: 2,
-                    name: "赵掌柜",
+                    name: "李四",
                     gender: 1,
-                    age: 35,
+                    age: 28,
                     attributes: new Dictionary<AttributeTypeEnum, float>()
                     {
-                        { AttributeTypeEnum.Strength, 40f },
-                        { AttributeTypeEnum.Agility, 45f },
-                        { AttributeTypeEnum.Wit, 60f },
-                        { AttributeTypeEnum.Charm, 55f },
-                        { AttributeTypeEnum.Physique, 45f },
-                        { AttributeTypeEnum.Luck, 40f }
-                    },
-                    current_location_id: 1
-                )
-            },
-
-            {
-                3,
-                new CharacterData(
-                    id: 3,
-                    name: "钱铁匠",
-                    gender: 1,
-                    age: 42,
-                    attributes: new Dictionary<AttributeTypeEnum, float>()
-                    {
-                        { AttributeTypeEnum.Strength, 60f },
-                        { AttributeTypeEnum.Agility, 40f },
-                        { AttributeTypeEnum.Wit, 35f },
-                        { AttributeTypeEnum.Charm, 40f },
-                        { AttributeTypeEnum.Physique, 65f },
-                        { AttributeTypeEnum.Luck, 45f }
-                    },
-                    current_location_id: 2
-                )
-            },
-
-            {
-                4,
-                new CharacterData(
-                    id: 4,
-                    name: "孙老农",
-                    gender: 1,
-                    age: 55,
-                    attributes: new Dictionary<AttributeTypeEnum, float>()
-                    {
-                        { AttributeTypeEnum.Strength, 45f },
+                        { AttributeTypeEnum.Strength, 50f },
                         { AttributeTypeEnum.Agility, 50f },
-                        { AttributeTypeEnum.Wit, 40f },
+                        { AttributeTypeEnum.Wit, 50f },
                         { AttributeTypeEnum.Charm, 50f },
                         { AttributeTypeEnum.Physique, 50f },
                         { AttributeTypeEnum.Luck, 50f }
                     },
-                    current_location_id: 4
+                    current_location_id: 1,
+                    current_scene_id: 3
                 )
             }
         };

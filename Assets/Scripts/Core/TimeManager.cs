@@ -1,97 +1,118 @@
 using System;
 
 /// <summary>
-/// 时间管理器——负责游戏内年/月/旬的推进
+/// 时间管理器——负责游戏内年/月/日/时段的推进
+/// 每天6个时段：深夜/凌晨/上午/中午/下午/晚上
+/// 每月固定30天，每年12个月
 /// </summary>
-public class TimeManager
+public class TimeManager : Singleton<TimeManager>
 {
-    // 单例
-    public static TimeManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = new TimeManager();
-            }
-            return instance;
-        }
-    }
-    private static TimeManager instance;
-
     // 当前年份（从第1年开始）
     public int year;
     // 当前月份（1-12）
     public int month;
-    // 当前处于哪一旬
-    public PeriodEnum current_period;
+    // 当前日期（1-30）
+    public int day;
+    // 当前时段
+    public TimePeriodEnum current_period;
 
     /// <summary>
-    /// 每推进一旬时触发，供其他模块监听
+    /// 每推进一个时段时触发，供其他模块监听
     /// </summary>
-    public event Action OnPeriodChanged;
+    public event Action OnTimeAdvanced;
 
     private TimeManager()
     {
         year = 1;
         month = 1;
-        current_period = PeriodEnum.Early;
+        day = 1;
+        current_period = TimePeriodEnum.DeadOfNight;
     }
 
     /// <summary>
-    /// 获取格式化的时间字符串，如 "1年1月上旬"
+    /// 获取格式化的时间字符串，如 "1年1月1日 上午"
     /// </summary>
     public string GetDateString()
     {
         string period_str = "";
-        if (current_period == PeriodEnum.Early)
+        if (current_period == TimePeriodEnum.DeadOfNight)
         {
-            period_str = "上旬";
+            period_str = "深夜";
         }
-        else if (current_period == PeriodEnum.Mid)
+        else if (current_period == TimePeriodEnum.EarlyMorning)
         {
-            period_str = "中旬";
+            period_str = "凌晨";
         }
-        else if (current_period == PeriodEnum.Late)
+        else if (current_period == TimePeriodEnum.Morning)
         {
-            period_str = "下旬";
+            period_str = "上午";
         }
-        return $"{year}年{month}月{period_str}";
+        else if (current_period == TimePeriodEnum.Noon)
+        {
+            period_str = "中午";
+        }
+        else if (current_period == TimePeriodEnum.Afternoon)
+        {
+            period_str = "下午";
+        }
+        else if (current_period == TimePeriodEnum.Evening)
+        {
+            period_str = "晚上";
+        }
+        return $"{year}年{month}月{day}日 {period_str}";
     }
 
     /// <summary>
-    /// 推进 N 旬，默认推进1旬
+    /// 推进 N 个时段，默认推进1个时段
     /// </summary>
-    public void AdvancePeriod(int count = 1)
+    public void AdvanceTime(int count = 1)
     {
         for (int i = 0; i < count; i++)
         {
-            AdvanceOnePeriod();
+            AdvanceOneSlot();
         }
+        OnTimeAdvanced?.Invoke();
     }
 
-    // 推进一旬的内部逻辑
-    private void AdvanceOnePeriod()
+    // 推进一个时段的内部逻辑
+    private void AdvanceOneSlot()
     {
-        switch (current_period)
+        // 按时段顺序推进
+        if (current_period == TimePeriodEnum.DeadOfNight)
         {
-            case PeriodEnum.Early:
-                current_period = PeriodEnum.Mid;
-                break;
-            case PeriodEnum.Mid:
-                current_period = PeriodEnum.Late;
-                break;
-            case PeriodEnum.Late:
-                // 下旬走完 → 进下个月
-                current_period = PeriodEnum.Early;
+            current_period = TimePeriodEnum.EarlyMorning;
+        }
+        else if (current_period == TimePeriodEnum.EarlyMorning)
+        {
+            current_period = TimePeriodEnum.Morning;
+        }
+        else if (current_period == TimePeriodEnum.Morning)
+        {
+            current_period = TimePeriodEnum.Noon;
+        }
+        else if (current_period == TimePeriodEnum.Noon)
+        {
+            current_period = TimePeriodEnum.Afternoon;
+        }
+        else if (current_period == TimePeriodEnum.Afternoon)
+        {
+            current_period = TimePeriodEnum.Evening;
+        }
+        else if (current_period == TimePeriodEnum.Evening)
+        {
+            // 晚上走完 → 进下一天
+            current_period = TimePeriodEnum.DeadOfNight;
+            day++;
+            if (day > 30)
+            {
+                day = 1;
                 month++;
                 if (month > 12)
                 {
                     month = 1;
                     year++;
                 }
-                break;
+            }
         }
-        OnPeriodChanged?.Invoke();
     }
 }

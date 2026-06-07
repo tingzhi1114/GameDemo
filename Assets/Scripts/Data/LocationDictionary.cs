@@ -3,22 +3,8 @@ using System.Collections.Generic;
 /// <summary>
 /// 地点数据字典——存放所有地点
 /// </summary>
-public class LocationDictionary
+public class LocationDictionary : Singleton<LocationDictionary>
 {
-    // 单例
-    public static LocationDictionary Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                instance = new LocationDictionary();
-            }
-            return instance;
-        }
-    }
-    private static LocationDictionary instance;
-
     // 所有地点（key=地点ID）
     private Dictionary<int, LocationData> all_locations;
 
@@ -30,81 +16,26 @@ public class LocationDictionary
                 1,
                 new LocationData(
                     id: 1,
-                    name: "汴京",
+                    name: "锦安城",
                     type: LocationTypeEnum.City,
                     connections: new Dictionary<int, float>()
                     {
-                        { 2, 3f },
-                        { 3, 5f }
-                    }
+                        { 2, 4f }
+                    },
+                    top_scene_id: 1
                 )
             },
-
             {
                 2,
                 new LocationData(
                     id: 2,
-                    name: "应天府",
+                    name: "洛川城",
                     type: LocationTypeEnum.City,
                     connections: new Dictionary<int, float>()
                     {
-                        { 1, 3f },
-                        { 4, 2f },
-                        { 5, 4f }
-                    }
-                )
-            },
-
-            {
-                3,
-                new LocationData(
-                    id: 3,
-                    name: "洛阳",
-                    type: LocationTypeEnum.City,
-                    connections: new Dictionary<int, float>()
-                    {
-                        { 1, 5f },
-                        { 6, 3f }
-                    }
-                )
-            },
-
-            {
-                4,
-                new LocationData(
-                    id: 4,
-                    name: "柳溪村",
-                    type: LocationTypeEnum.Village,
-                    connections: new Dictionary<int, float>()
-                    {
-                        { 2, 2f }
-                    }
-                )
-            },
-
-            {
-                5,
-                new LocationData(
-                    id: 5,
-                    name: "黑风林",
-                    type: LocationTypeEnum.Forest,
-                    connections: new Dictionary<int, float>()
-                    {
-                        { 2, 4f }
-                    }
-                )
-            },
-
-            {
-                6,
-                new LocationData(
-                    id: 6,
-                    name: "苍龙山",
-                    type: LocationTypeEnum.Mountain,
-                    connections: new Dictionary<int, float>()
-                    {
-                        { 3, 3f }
-                    }
+                        { 1, 4f }
+                    },
+                    top_scene_id: 5
                 )
             }
         };
