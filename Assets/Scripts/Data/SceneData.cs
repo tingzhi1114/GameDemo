@@ -18,6 +18,8 @@ public class SceneData
     public int template_id;
     // 场景名称（如"秦淮河畔"）
     public string name;
+    // 当前在此场景的角色ID列表（运行时动态数据，不由数据字典初始化）
+    public List<int> character_ids;
 
     public SceneData(int id, int location_id, string name, int parent_scene_id = -1, int template_id = -1, List<int> children_ids = null)
     {
@@ -27,5 +29,6 @@ public class SceneData
         this.parent_scene_id = parent_scene_id;
         this.template_id = template_id;
         this.children_ids = children_ids;
+        this.character_ids = new List<int>();
     }
 }

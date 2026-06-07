@@ -11,10 +11,6 @@ public class PanelTitle : MonoBehaviour
 
     private void Awake()
     {
-        // 订阅事件，自动刷新
-        ActionEffect.OnActionExecuted += Refresh;
-        PanelMove.OnSceneChanged += Refresh;
-
         // 通过Transform查找子物体
         Transform panel = this.transform;
         text_time = panel.Find("Image_Time/Text_Time").GetComponent<TextMeshProUGUI>();
@@ -73,11 +69,5 @@ public class PanelTitle : MonoBehaviour
                 }
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        ActionEffect.OnActionExecuted -= Refresh;
-        PanelMove.OnSceneChanged -= Refresh;
     }
 }

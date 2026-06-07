@@ -11,6 +11,9 @@ public class GameTest : MonoBehaviour
         // 设置玩家ID
         Player.Instance.character_id = 1;
 
+        // 触发EventManager静态构造器，订阅全局事件
+        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(EventManager).TypeHandle);
+
         Debug.Log("GameTest: 游戏初始化完成");
     }
 
@@ -22,6 +25,20 @@ public class GameTest : MonoBehaviour
         {
             player.current_location_id = 1;
             player.current_scene_id = 1;
+        }
+
+        // 将玩家加入当前场景的角色列表
+        SceneData start_scene = SceneDictionary.Instance.Get(player.current_scene_id);
+        if (start_scene != null && player != null)
+        {
+            start_scene.character_ids.Add(player.id);
+        }
+
+        // 将李四加入锦安城·客栈（scene_id=3）
+        SceneData inn_scene = SceneDictionary.Instance.Get(3);
+        if (inn_scene != null)
+        {
+            inn_scene.character_ids.Add(2);
         }
 
         // 首次刷新所有面板

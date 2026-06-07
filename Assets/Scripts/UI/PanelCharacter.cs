@@ -14,10 +14,6 @@ public class PanelCharacter : MonoBehaviour
 
     private void Awake()
     {
-        // 订阅事件，自动刷新
-        ActionEffect.OnActionExecuted += Refresh;
-        PanelMove.OnSceneChanged += Refresh;
-
         content = this.transform.Find("Scroll_View/Viewport/Content");
     }
 
@@ -44,17 +40,24 @@ public class PanelCharacter : MonoBehaviour
         }
 
         int current_scene_id = player.current_scene_id;
-        int player_id = player.id;
 
-        // 遍历所有角色，找出在同一场景且不是玩家的NPC
-        foreach (CharacterData character in CharacterDictionary.Instance.GetAll())
+        // 通过场景的character_ids直接获取当前场景的角色
+        SceneData current_scene = SceneDictionary.Instance.Get(current_scene_id);
+        if (current_scene == null || current_scene.character_ids == null)
         {
-            if (character.id == player_id)
+            return;
+        }
+
+        foreach (int char_id in current_scene.character_ids)
+        {
+            // 跳过玩家自己
+            if (char_id == player.id)
             {
                 continue;
             }
 
-            if (character.current_scene_id != current_scene_id)
+            CharacterData character = CharacterDictionary.Instance.Get(char_id);
+            if (character == null)
             {
                 continue;
             }
@@ -71,11 +74,5 @@ public class PanelCharacter : MonoBehaviour
             TextMeshProUGUI text_relationship = button_obj.transform.Find("Text_Relationship").GetComponent<TextMeshProUGUI>();
             text_relationship.text = "普通";
         }
-    }
-
-    private void OnDestroy()
-    {
-        ActionEffect.OnActionExecuted -= Refresh;
-        PanelMove.OnSceneChanged -= Refresh;
     }
 }

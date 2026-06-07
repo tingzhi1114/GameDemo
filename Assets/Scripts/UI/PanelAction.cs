@@ -7,6 +7,11 @@ using TMPro;
 /// </summary>
 public class PanelAction : MonoBehaviour
 {
+    /// <summary>
+    /// 行动执行后触发，EventManager订阅此事件
+    /// </summary>
+    public static event System.Action OnActionExecuted;
+
     // 在Inspector中拖入 Button_Action 预制体
     public GameObject action_button_prefab;
 
@@ -14,10 +19,6 @@ public class PanelAction : MonoBehaviour
 
     private void Awake()
     {
-        // 订阅事件，自动刷新
-        ActionEffect.OnActionExecuted += Refresh;
-        PanelMove.OnSceneChanged += Refresh;
-
         content = this.transform.Find("Scroll_View/Viewport/Content");
     }
 
@@ -80,13 +81,9 @@ public class PanelAction : MonoBehaviour
             button.onClick.AddListener(() =>
             {
                 ActionEffect.Instance.Execute(captured_id, Player.Instance.character_id);
+                // 行动执行完毕，通知EventManager刷新UI
+                OnActionExecuted?.Invoke();
             });
         }
-    }
-
-    private void OnDestroy()
-    {
-        ActionEffect.OnActionExecuted -= Refresh;
-        PanelMove.OnSceneChanged -= Refresh;
     }
 }

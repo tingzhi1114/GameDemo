@@ -18,9 +18,9 @@ public class LocationDictionary : Singleton<LocationDictionary>
                     id: 1,
                     name: "锦安城",
                     type: LocationTypeEnum.City,
-                    connections: new Dictionary<int, float>()
+                    connections: new Dictionary<int, int>()
                     {
-                        { 2, 4f }
+                        { 2, 24 }
                     },
                     top_scene_id: 1
                 )
@@ -31,9 +31,9 @@ public class LocationDictionary : Singleton<LocationDictionary>
                     id: 2,
                     name: "洛川城",
                     type: LocationTypeEnum.City,
-                    connections: new Dictionary<int, float>()
+                    connections: new Dictionary<int, int>()
                     {
-                        { 1, 4f }
+                        { 1, 24 }
                     },
                     top_scene_id: 5
                 )

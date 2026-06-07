@@ -5,11 +5,6 @@ using UnityEngine;
 /// </summary>
 public class ActionEffect : Singleton<ActionEffect>
 {
-    /// <summary>
-    /// 行动执行后触发，供UI面板刷新
-    /// </summary>
-    public static event System.Action OnActionExecuted;
-
     private ActionEffect()
     {
     }
@@ -127,7 +122,6 @@ public class ActionEffect : Singleton<ActionEffect>
             Debug.Log(character.name + "在城中四处闲逛，打发时间。");
         }
 
-        // 行动执行完毕，通知所有订阅者刷新
-        OnActionExecuted?.Invoke();
+        // 行动执行完毕
     }
 }

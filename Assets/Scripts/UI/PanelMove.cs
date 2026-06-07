@@ -7,7 +7,9 @@ using TMPro;
 /// </summary>
 public class PanelMove : MonoBehaviour
 {
-    // 场景切换时触发，供其他面板刷新
+    /// <summary>
+    /// 场景切换后触发，EventManager订阅此事件
+    /// </summary>
     public static event System.Action OnSceneChanged;
 
     // 在Inspector中拖入 Button_Move 预制体
@@ -18,15 +20,13 @@ public class PanelMove : MonoBehaviour
 
     private void Awake()
     {
-        // 订阅行动执行事件，自动刷新
-        ActionEffect.OnActionExecuted += Refresh;
-
         content = this.transform.Find("Scroll_View/Viewport/Content");
 
-        // 绑定离开按钮
+        // 绑定离开按钮（先清空旧监听，避免残留）
         button_leave = this.transform.Find("Button_Leave")?.GetComponent<Button>();
         if (button_leave != null)
         {
+            button_leave.onClick.RemoveAllListeners();
             button_leave.onClick.AddListener(OnLeaveClicked);
         }
     }
@@ -104,10 +104,8 @@ public class PanelMove : MonoBehaviour
         // 进入新场景，时间推进1个时段
         TimeManager.Instance.AdvanceTime(1);
 
-        // 通知所有面板场景已切换
+        // 触发场景切换事件（EventManager订阅后刷新UI）
         OnSceneChanged?.Invoke();
-        // 自己刷新
-        Refresh();
     }
 
     // 点击离开按钮
@@ -132,19 +130,16 @@ public class PanelMove : MonoBehaviour
         }
         else
         {
-            // 顶级场景：返回大地图（暂未实现，占位）
-            Debug.Log("返回大地图（功能待实现）");
+            // 顶级场景：打开大地图
+            PanelMap panel_map = FindObjectOfType<PanelMap>(true);
+            if (panel_map != null)
+            {
+                panel_map.gameObject.SetActive(true);
+            }
             return;
         }
 
-        // 通知所有面板场景已切换
+        // 触发场景切换事件（EventManager订阅后刷新UI）
         OnSceneChanged?.Invoke();
-        // 自己刷新
-        Refresh();
-    }
-
-    private void OnDestroy()
-    {
-        ActionEffect.OnActionExecuted -= Refresh;
     }
 }

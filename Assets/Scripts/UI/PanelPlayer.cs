@@ -20,10 +20,6 @@ public class PanelPlayer : MonoBehaviour
 
     private void Awake()
     {
-        // 订阅事件，自动刷新
-        ActionEffect.OnActionExecuted += Refresh;
-        PanelMove.OnSceneChanged += Refresh;
-
         Transform panel = this.transform;
 
         text_name = panel.Find("Image_Name/Text_Name").GetComponent<TextMeshProUGUI>();
@@ -72,12 +68,5 @@ public class PanelPlayer : MonoBehaviour
         text_satiety.text = "饱腹：" + player.GetFullnessStatus();
 
         text_money.text = "金钱：" + player.money;
-    }
-
-    private void OnDestroy()
-    {
-        // 取消订阅
-        ActionEffect.OnActionExecuted -= Refresh;
-        PanelMove.OnSceneChanged -= Refresh;
     }
 }
