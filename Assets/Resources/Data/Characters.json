@@ -1,0 +1,36 @@
+{
+  "characters": [
+    {
+      "id": 1,
+      "name": "无名氏",
+      "gender": 1,
+      "age": 16,
+      "current_location_id": 1,
+      "current_scene_id": 1,
+      "attributes": [
+        { "type": "Strength", "value": 50 },
+        { "type": "Agility", "value": 50 },
+        { "type": "Wit", "value": 50 },
+        { "type": "Charm", "value": 50 },
+        { "type": "Physique", "value": 50 },
+        { "type": "Luck", "value": 50 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "李四",
+      "gender": 1,
+      "age": 28,
+      "current_location_id": 1,
+      "current_scene_id": 3,
+      "attributes": [
+        { "type": "Strength", "value": 50 },
+        { "type": "Agility", "value": 50 },
+        { "type": "Wit", "value": 50 },
+        { "type": "Charm", "value": 50 },
+        { "type": "Physique", "value": 50 },
+        { "type": "Luck", "value": 50 }
+      ]
+    }
+  ]
+}

@@ -48,7 +48,7 @@ public class PanelPlayer : MonoBehaviour
     /// </summary>
     public void Refresh()
     {
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;

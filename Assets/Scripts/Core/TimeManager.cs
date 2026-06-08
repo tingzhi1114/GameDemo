@@ -34,31 +34,8 @@ public class TimeManager : Singleton<TimeManager>
     /// </summary>
     public string GetDateString()
     {
-        string period_str = "";
-        if (current_period == TimePeriodEnum.DeadOfNight)
-        {
-            period_str = "深夜";
-        }
-        else if (current_period == TimePeriodEnum.EarlyMorning)
-        {
-            period_str = "凌晨";
-        }
-        else if (current_period == TimePeriodEnum.Morning)
-        {
-            period_str = "上午";
-        }
-        else if (current_period == TimePeriodEnum.Noon)
-        {
-            period_str = "中午";
-        }
-        else if (current_period == TimePeriodEnum.Afternoon)
-        {
-            period_str = "下午";
-        }
-        else if (current_period == TimePeriodEnum.Evening)
-        {
-            period_str = "晚上";
-        }
+        string[] period_names = { "深夜", "凌晨", "上午", "中午", "下午", "晚上" };
+        string period_str = period_names[(int)current_period];
         return $"{year}年{month}月{day}日 {period_str}";
     }
 

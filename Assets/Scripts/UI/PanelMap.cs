@@ -26,12 +26,14 @@ public class PanelMap : MonoBehaviour
                 this.gameObject.SetActive(false);
             });
         }
+
+        // 只绑定一次地点按钮事件
+        BindLocationButtons();
     }
 
     private void OnEnable()
     {
         Refresh();
-        BindLocationButtons();
     }
 
     /// <summary>
@@ -45,7 +47,7 @@ public class PanelMap : MonoBehaviour
             return;
         }
 
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;
@@ -101,7 +103,7 @@ public class PanelMap : MonoBehaviour
             return;
         }
 
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;
@@ -125,9 +127,9 @@ public class PanelMap : MonoBehaviour
             TimeManager.Instance.AdvanceTime(distance);
         }
 
-        // 切换到目标地点
+        // 切换到目标地点（自动处理旧场景移除和新场景加入）
         player.current_location_id = target_location.id;
-        player.current_scene_id = target_location.top_scene_id;
+        player.EnterScene(target_location.top_scene_id);
 
         // 关闭大地图
         this.gameObject.SetActive(false);
@@ -147,7 +149,7 @@ public class PanelMap : MonoBehaviour
             return;
         }
 
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;

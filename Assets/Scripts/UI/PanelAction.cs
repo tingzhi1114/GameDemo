@@ -38,7 +38,7 @@ public class PanelAction : MonoBehaviour
             Destroy(content.GetChild(i).gameObject);
         }
 
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;

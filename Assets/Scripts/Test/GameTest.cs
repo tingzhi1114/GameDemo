@@ -11,8 +11,8 @@ public class GameTest : MonoBehaviour
         // 设置玩家ID
         Player.Instance.character_id = 1;
 
-        // 触发EventManager静态构造器，订阅全局事件
-        System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(EventManager).TypeHandle);
+        // 初始化EventManager（订阅事件 + 缓存面板）
+        EventManager.Init();
 
         Debug.Log("GameTest: 游戏初始化完成");
     }
@@ -20,7 +20,7 @@ public class GameTest : MonoBehaviour
     private void Start()
     {
         // 玩家进入锦安城顶级场景
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player != null)
         {
             player.current_location_id = 1;

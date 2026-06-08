@@ -1,0 +1,68 @@
+{
+  "scenes": [
+    {
+      "id": 1,
+      "location_id": 1,
+      "name": "锦安城",
+      "parent_scene_id": -1,
+      "template_id": 4,
+      "children_ids": [2, 3, 4]
+    },
+    {
+      "id": 2,
+      "location_id": 1,
+      "name": "市集",
+      "parent_scene_id": 1,
+      "template_id": 1,
+      "children_ids": null
+    },
+    {
+      "id": 3,
+      "location_id": 1,
+      "name": "客栈",
+      "parent_scene_id": 1,
+      "template_id": 2,
+      "children_ids": null
+    },
+    {
+      "id": 4,
+      "location_id": 1,
+      "name": "寺庙",
+      "parent_scene_id": 1,
+      "template_id": 3,
+      "children_ids": null
+    },
+    {
+      "id": 5,
+      "location_id": 2,
+      "name": "洛川城",
+      "parent_scene_id": -1,
+      "template_id": 4,
+      "children_ids": [6, 7, 8]
+    },
+    {
+      "id": 6,
+      "location_id": 2,
+      "name": "市集",
+      "parent_scene_id": 5,
+      "template_id": 1,
+      "children_ids": null
+    },
+    {
+      "id": 7,
+      "location_id": 2,
+      "name": "客栈",
+      "parent_scene_id": 5,
+      "template_id": 2,
+      "children_ids": null
+    },
+    {
+      "id": 8,
+      "location_id": 2,
+      "name": "寺庙",
+      "parent_scene_id": 5,
+      "template_id": 3,
+      "children_ids": null
+    }
+  ]
+}

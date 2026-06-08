@@ -55,6 +55,29 @@ public class CharacterData
     }
 
     /// <summary>
+    /// 进入指定场景——自动从旧场景移除并加入新场景
+    /// </summary>
+    public void EnterScene(int scene_id)
+    {
+        // 从旧场景移除
+        SceneData old_scene = SceneDictionary.Instance.Get(this.current_scene_id);
+        if (old_scene != null)
+        {
+            old_scene.character_ids.Remove(this.id);
+        }
+
+        // 更新当前场景ID
+        this.current_scene_id = scene_id;
+
+        // 加入新场景
+        SceneData new_scene = SceneDictionary.Instance.Get(scene_id);
+        if (new_scene != null)
+        {
+            new_scene.character_ids.Add(this.id);
+        }
+    }
+
+    /// <summary>
     /// 修改某项属性值（加上delta，负数为减少）
     /// </summary>
     public void ModifyAttribute(AttributeTypeEnum type, float delta)

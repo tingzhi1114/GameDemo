@@ -31,7 +31,7 @@ public class PanelTitle : MonoBehaviour
         text_time.text = TimeManager.Instance.GetDateString();
 
         // 更新位置
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player != null)
         {
             if (player.current_scene_id >= 0)

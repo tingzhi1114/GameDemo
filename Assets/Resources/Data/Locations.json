@@ -1,0 +1,22 @@
+{
+  "locations": [
+    {
+      "id": 1,
+      "name": "锦安城",
+      "type": "City",
+      "top_scene_id": 1,
+      "connections": [
+        { "target_id": 2, "distance": 24 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "洛川城",
+      "type": "City",
+      "top_scene_id": 5,
+      "connections": [
+        { "target_id": 1, "distance": 24 }
+      ]
+    }
+  ]
+}

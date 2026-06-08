@@ -1,0 +1,24 @@
+{
+  "templates": [
+    {
+      "id": 1,
+      "name": "市集",
+      "action_ids": [1, 2]
+    },
+    {
+      "id": 2,
+      "name": "客栈",
+      "action_ids": [3, 4, 5]
+    },
+    {
+      "id": 3,
+      "name": "寺庙",
+      "action_ids": [6, 7]
+    },
+    {
+      "id": 4,
+      "name": "城镇",
+      "action_ids": [8]
+    }
+  ]
+}

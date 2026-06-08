@@ -14,7 +14,7 @@ public class Player : Singleton<Player>
     /// <summary>
     /// 获取玩家对应的角色数据
     /// </summary>
-    public CharacterData Get()
+    public CharacterData GetCharacter()
     {
         return CharacterDictionary.Instance.Get(this.character_id);
     }

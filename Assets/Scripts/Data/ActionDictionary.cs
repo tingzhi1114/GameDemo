@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// 行动字典——存放所有可用的行动定义
+/// 行动字典——从 Actions.json 加载所有行动定义
 /// </summary>
 public class ActionDictionary : Singleton<ActionDictionary>
 {
@@ -10,73 +11,35 @@ public class ActionDictionary : Singleton<ActionDictionary>
 
     private ActionDictionary()
     {
-        this.all_actions = new Dictionary<int, ActionData>()
-        {
-            {
-                1,
-                new ActionData(
-                    id: 1,
-                    name: "购买交易品"
-                )
-            },
-            {
-                2,
-                new ActionData(
-                    id: 2,
-                    name: "贩卖交易品"
-                )
-            },
-            {
-                3,
-                new ActionData(
-                    id: 3,
-                    name: "用膳"
-                )
-            },
-            {
-                4,
-                new ActionData(
-                    id: 4,
-                    name: "住宿"
-                )
-            },
-            {
-                5,
-                new ActionData(
-                    id: 5,
-                    name: "打工"
-                )
-            },
-            {
-                6,
-                new ActionData(
-                    id: 6,
-                    name: "舍饭"
-                )
-            },
-            {
-                7,
-                new ActionData(
-                    id: 7,
-                    name: "借宿"
-                )
-            },
-            {
-                8,
-                new ActionData(
-                    id: 8,
-                    name: "闲逛"
-                )
-            }
-        };
-    }
+        this.all_actions = new Dictionary<int, ActionData>();
 
-    /// <summary>
-    /// 添加一个行动到字典中
-    /// </summary>
-    public void Add(ActionData action)
-    {
-        this.all_actions[action.id] = action;
+        // 从 Resources/Data/Actions.json 加载行动数据
+        TextAsset json_text = Resources.Load<TextAsset>("Data/Actions");
+        if (json_text == null)
+        {
+            Debug.LogError("Actions.json 未找到，请确保 Assets/Resources/Data/Actions.json 存在");
+            return;
+        }
+
+        ActionDataListJSON database = JsonUtility.FromJson<ActionDataListJSON>(json_text.text);
+        if (database == null || database.actions == null)
+        {
+            Debug.LogError("Actions.json 解析失败，请检查 JSON 格式");
+            return;
+        }
+
+        // 遍历JSON条目，逐条解析为ActionData
+        for (int i = 0; i < database.actions.Count; i++)
+        {
+            ActionDataJSON entry = database.actions[i];
+            ActionData action = new ActionData(
+                id: entry.id,
+                name: entry.name
+            );
+            this.all_actions[action.id] = action;
+        }
+
+        Debug.Log("ActionDictionary: 从 Actions.json 加载了 " + this.all_actions.Count + " 个行动");
     }
 
     /// <summary>
@@ -89,24 +52,5 @@ public class ActionDictionary : Singleton<ActionDictionary>
             return this.all_actions[id];
         }
         return null;
-    }
-
-    /// <summary>
-    /// 移除指定ID的行动
-    /// </summary>
-    public void Remove(int id)
-    {
-        if (this.all_actions.ContainsKey(id))
-        {
-            this.all_actions.Remove(id);
-        }
-    }
-
-    /// <summary>
-    /// 获取所有行动（返回副本）
-    /// </summary>
-    public List<ActionData> GetAll()
-    {
-        return new List<ActionData>(this.all_actions.Values);
     }
 }

@@ -34,3 +34,36 @@ public enum AttributeTypeEnum
     Physique,   // 体魄
     Luck        // 气运
 }
+
+// 物品类型（8大类）
+public enum ItemTypeEnum
+{
+    Consumable,     // 消耗品
+    Tool,           // 器具
+    Clothing,       // 衣物
+    Book,           // 书籍
+    Collectible,    // 收集品
+    Material,       // 材料
+    TradeGood,      // 交易品
+    Special         // 特殊
+}
+
+// 物品特性类型（暂空，后续按需追加枚举值）
+public enum ItemPropertyType
+{
+}
+
+// 物品效果类型（使用物品时执行的各项效果）
+public enum ItemEffectType
+{
+    ModifyMoney,        // 增减金钱
+    ModifyHealth,       // 增减健康
+    ModifyEnergy,       // 增减精力
+    ModifyFullness,     // 增减饱腹
+    ModifyStrength,     // 增减力量
+    ModifyAgility,      // 增减敏捷
+    ModifyWit,          // 增减才智
+    ModifyCharm,        // 增减魅力
+    ModifyPhysique,     // 增减体魄
+    ModifyLuck          // 增减气运
+}

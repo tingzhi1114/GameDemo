@@ -1,66 +1,87 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// 角色数据字典——存放所有角色
+/// 角色数据字典——从 Characters.json 加载所有角色
 /// </summary>
 public class CharacterDictionary : Singleton<CharacterDictionary>
 {
     // 所有角色（key=角色ID）
     private Dictionary<int, CharacterData> all_characters;
+    // 下一个可用的自增ID
+    private int next_id;
 
     private CharacterDictionary()
     {
-        this.all_characters = new Dictionary<int, CharacterData>()
+        this.all_characters = new Dictionary<int, CharacterData>();
+
+        // 从 Resources/Data/Characters.json 加载角色数据
+        TextAsset json_text = Resources.Load<TextAsset>("Data/Characters");
+        if (json_text == null)
         {
+            Debug.LogError("Characters.json 未找到，请确保 Assets/Resources/Data/Characters.json 存在");
+            return;
+        }
+
+        CharacterDataListJSON database = JsonUtility.FromJson<CharacterDataListJSON>(json_text.text);
+        if (database == null || database.characters == null)
+        {
+            Debug.LogError("Characters.json 解析失败，请检查 JSON 格式");
+            return;
+        }
+
+        // 遍历JSON条目，逐条解析为CharacterData
+        for (int i = 0; i < database.characters.Count; i++)
+        {
+            CharacterDataJSON entry = database.characters[i];
+            CharacterData character = ParseEntry(entry);
+            if (character != null)
             {
-                1,
-                new CharacterData(
-                    id: 1,
-                    name: "无名氏",
-                    gender: 1,
-                    age: 16,
-                    attributes: new Dictionary<AttributeTypeEnum, float>()
-                    {
-                        { AttributeTypeEnum.Strength, 50f },
-                        { AttributeTypeEnum.Agility, 50f },
-                        { AttributeTypeEnum.Wit, 50f },
-                        { AttributeTypeEnum.Charm, 50f },
-                        { AttributeTypeEnum.Physique, 50f },
-                        { AttributeTypeEnum.Luck, 50f }
-                    },
-                    current_location_id: 1,
-                    current_scene_id: 1
-                )
-            },
-            {
-                2,
-                new CharacterData(
-                    id: 2,
-                    name: "李四",
-                    gender: 1,
-                    age: 28,
-                    attributes: new Dictionary<AttributeTypeEnum, float>()
-                    {
-                        { AttributeTypeEnum.Strength, 50f },
-                        { AttributeTypeEnum.Agility, 50f },
-                        { AttributeTypeEnum.Wit, 50f },
-                        { AttributeTypeEnum.Charm, 50f },
-                        { AttributeTypeEnum.Physique, 50f },
-                        { AttributeTypeEnum.Luck, 50f }
-                    },
-                    current_location_id: 1,
-                    current_scene_id: 3
-                )
+                this.all_characters[character.id] = character;
             }
-        };
+        }
+
+        // 以JSON中最大ID为基础，后续新增角色的ID递增
+        int max_id = 0;
+        foreach (int key in this.all_characters.Keys)
+        {
+            if (key > max_id)
+            {
+                max_id = key;
+            }
+        }
+        this.next_id = max_id + 1;
+
+        Debug.Log("CharacterDictionary: 从 Characters.json 加载了 " + this.all_characters.Count + " 个角色");
     }
 
     /// <summary>
-    /// 添加一个角色到字典中
+    /// 将一条 JSON 条目解析为 CharacterData
     /// </summary>
-    public void Add(CharacterData character)
+    private CharacterData ParseEntry(CharacterDataJSON entry)
     {
-        this.all_characters[character.id] = character;
+        // 将 attributes 列表转为字典
+        Dictionary<AttributeTypeEnum, float> attr_dict = new Dictionary<AttributeTypeEnum, float>();
+        if (entry.attributes != null && entry.attributes.Count > 0)
+        {
+            for (int i = 0; i < entry.attributes.Count; i++)
+            {
+                AttributeTypeEnum attr_type = AttributeTypeEnum.Strength;
+                Enum.TryParse(entry.attributes[i].type, out attr_type);
+                attr_dict[attr_type] = entry.attributes[i].value;
+            }
+        }
+
+        return new CharacterData(
+            id: entry.id,
+            name: entry.name,
+            gender: entry.gender,
+            age: entry.age,
+            attributes: attr_dict,
+            current_location_id: entry.current_location_id,
+            current_scene_id: entry.current_scene_id
+        );
     }
 
     /// <summary>
@@ -76,21 +97,22 @@ public class CharacterDictionary : Singleton<CharacterDictionary>
     }
 
     /// <summary>
-    /// 移除指定ID的角色
+    /// 添加一个角色到字典中，自动分配自增ID
     /// </summary>
-    public void Remove(int id)
+    public int Add(CharacterData character)
     {
-        if (this.all_characters.ContainsKey(id))
-        {
-            this.all_characters.Remove(id);
-        }
+        int new_id = this.next_id;
+        this.next_id++;
+        character.id = new_id;
+        this.all_characters[new_id] = character;
+        return new_id;
     }
 
     /// <summary>
-    /// 获取所有角色（返回副本，外部修改不影响内部）
+    /// 移除指定ID的角色（角色死亡时调用）
     /// </summary>
-    public List<CharacterData> GetAll()
+    public void Remove(int id)
     {
-        return new List<CharacterData>(this.all_characters.Values);
+        this.all_characters.Remove(id);
     }
 }

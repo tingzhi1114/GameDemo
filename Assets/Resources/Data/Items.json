@@ -1,0 +1,208 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "粗粮饼",
+      "description": "粗粮制成的饼，口感粗糙但能填肚子。",
+      "type": "Consumable",
+      "grade": 9,
+      "base_value": 2,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 15 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "粗粮饼",
+      "description": "粗粮制成的饼，口感粗糙但能填肚子。",
+      "type": "Consumable",
+      "grade": 8,
+      "base_value": 4,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 20 }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "阳春面",
+      "description": "一碗清汤面，简简单单。",
+      "type": "Consumable",
+      "grade": 9,
+      "base_value": 5,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 25 }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "阳春面",
+      "description": "一碗清汤面，简简单单。",
+      "type": "Consumable",
+      "grade": 8,
+      "base_value": 8,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 30 },
+        { "type": "ModifyEnergy", "value": 10 }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "酱牛肉",
+      "description": "卤制入味的酱牛肉，是下酒的好菜。",
+      "type": "Consumable",
+      "grade": 9,
+      "base_value": 10,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 35 },
+        { "type": "ModifyEnergy", "value": 10 }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "酱牛肉",
+      "description": "卤制入味的酱牛肉，是下酒的好菜。",
+      "type": "Consumable",
+      "grade": 8,
+      "base_value": 15,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 40 },
+        { "type": "ModifyEnergy", "value": 15 }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "浊酒",
+      "description": "浑浊的劣酒，辛辣刺鼻。",
+      "type": "Consumable",
+      "grade": 9,
+      "base_value": 6,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyEnergy", "value": 15 },
+        { "type": "ModifyHealth", "value": -5 }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "浊酒",
+      "description": "浑浊的劣酒，辛辣刺鼻。",
+      "type": "Consumable",
+      "grade": 8,
+      "base_value": 10,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyEnergy", "value": 20 },
+        { "type": "ModifyHealth", "value": -5 }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "姜汤",
+      "description": "热腾腾的姜汤，驱寒暖身。",
+      "type": "Consumable",
+      "grade": 9,
+      "base_value": 3,
+      "max_stack": 10,
+      "effects": [
+        { "type": "ModifyFullness", "value": 10 },
+        { "type": "ModifyHealth", "value": 10 }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "大米",
+      "description": "上好的白米，粒粒饱满。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 5,
+      "max_stack": 99
+    },
+    {
+      "id": 11,
+      "name": "布匹",
+      "description": "寻常的棉布，质地尚可。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 8,
+      "max_stack": 99
+    },
+    {
+      "id": 12,
+      "name": "木材",
+      "description": "干燥结实的木料。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 6,
+      "max_stack": 99
+    },
+    {
+      "id": 13,
+      "name": "药材",
+      "description": "各类草药晒干而成，可入药。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 15,
+      "max_stack": 99
+    },
+    {
+      "id": 14,
+      "name": "茶叶",
+      "description": "炒制好的茶叶，香气扑鼻。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 12,
+      "max_stack": 99
+    },
+    {
+      "id": 15,
+      "name": "铜矿",
+      "description": "未冶炼的铜矿石。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 10,
+      "max_stack": 99
+    },
+    {
+      "id": 16,
+      "name": "铁矿",
+      "description": "未冶炼的铁矿石。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 10,
+      "max_stack": 99
+    },
+    {
+      "id": 17,
+      "name": "丝绸",
+      "description": "光滑柔软的丝织品，颇为名贵。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 30,
+      "max_stack": 99
+    },
+    {
+      "id": 18,
+      "name": "瓷器",
+      "description": "白瓷碗碟，做工精细。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 25,
+      "max_stack": 99
+    },
+    {
+      "id": 19,
+      "name": "宝石",
+      "description": "色彩斑斓的宝石，价值不菲。",
+      "type": "TradeGood",
+      "grade": 0,
+      "base_value": 50,
+      "max_stack": 99
+    }
+  ]
+}

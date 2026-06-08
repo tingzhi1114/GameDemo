@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// 场景模板字典——存放所有场景模板定义
+/// 场景模板字典——从 SceneTemplates.json 加载所有场景模板定义
 /// </summary>
 public class SceneTemplateDictionary : Singleton<SceneTemplateDictionary>
 {
@@ -10,49 +11,36 @@ public class SceneTemplateDictionary : Singleton<SceneTemplateDictionary>
 
     private SceneTemplateDictionary()
     {
-        this.all_templates = new Dictionary<int, SceneTemplateData>()
-        {
-            {
-                1,
-                new SceneTemplateData(
-                    id: 1,
-                    name: "市集",
-                    action_ids: new List<int>() { 1, 2 }
-                )
-            },
-            {
-                2,
-                new SceneTemplateData(
-                    id: 2,
-                    name: "客栈",
-                    action_ids: new List<int>() { 3, 4, 5 }
-                )
-            },
-            {
-                3,
-                new SceneTemplateData(
-                    id: 3,
-                    name: "寺庙",
-                    action_ids: new List<int>() { 6, 7 }
-                )
-            },
-            {
-                4,
-                new SceneTemplateData(
-                    id: 4,
-                    name: "城镇",
-                    action_ids: new List<int>() { 8 }
-                )
-            }
-        };
-    }
+        this.all_templates = new Dictionary<int, SceneTemplateData>();
 
-    /// <summary>
-    /// 添加一个模板到字典中
-    /// </summary>
-    public void Add(SceneTemplateData template)
-    {
-        this.all_templates[template.id] = template;
+        // 从 Resources/Data/SceneTemplates.json 加载模板数据
+        TextAsset json_text = Resources.Load<TextAsset>("Data/SceneTemplates");
+        if (json_text == null)
+        {
+            Debug.LogError("SceneTemplates.json 未找到，请确保 Assets/Resources/Data/SceneTemplates.json 存在");
+            return;
+        }
+
+        SceneTemplateDataListJSON database = JsonUtility.FromJson<SceneTemplateDataListJSON>(json_text.text);
+        if (database == null || database.templates == null)
+        {
+            Debug.LogError("SceneTemplates.json 解析失败，请检查 JSON 格式");
+            return;
+        }
+
+        // 遍历JSON条目，逐条解析为SceneTemplateData
+        for (int i = 0; i < database.templates.Count; i++)
+        {
+            SceneTemplateDataJSON entry = database.templates[i];
+            SceneTemplateData template = new SceneTemplateData(
+                id: entry.id,
+                name: entry.name,
+                action_ids: entry.action_ids
+            );
+            this.all_templates[template.id] = template;
+        }
+
+        Debug.Log("SceneTemplateDictionary: 从 SceneTemplates.json 加载了 " + this.all_templates.Count + " 个模板");
     }
 
     /// <summary>
@@ -65,24 +53,5 @@ public class SceneTemplateDictionary : Singleton<SceneTemplateDictionary>
             return this.all_templates[id];
         }
         return null;
-    }
-
-    /// <summary>
-    /// 移除指定ID的模板
-    /// </summary>
-    public void Remove(int id)
-    {
-        if (this.all_templates.ContainsKey(id))
-        {
-            this.all_templates.Remove(id);
-        }
-    }
-
-    /// <summary>
-    /// 获取所有模板（返回副本）
-    /// </summary>
-    public List<SceneTemplateData> GetAll()
-    {
-        return new List<SceneTemplateData>(this.all_templates.Values);
     }
 }

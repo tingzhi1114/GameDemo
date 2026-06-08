@@ -47,7 +47,7 @@ public class PanelMove : MonoBehaviour
             Destroy(content.GetChild(i).gameObject);
         }
 
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;
@@ -93,13 +93,13 @@ public class PanelMove : MonoBehaviour
     // 进入指定场景
     private void EnterScene(int scene_id)
     {
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;
         }
-
-        player.current_scene_id = scene_id;
+        // 更新玩家所在场景（自动处理旧场景移除和新场景加入）
+        player.EnterScene(scene_id);
 
         // 进入新场景，时间推进1个时段
         TimeManager.Instance.AdvanceTime(1);
@@ -111,7 +111,7 @@ public class PanelMove : MonoBehaviour
     // 点击离开按钮
     private void OnLeaveClicked()
     {
-        CharacterData player = Player.Instance.Get();
+        CharacterData player = Player.Instance.GetCharacter();
         if (player == null)
         {
             return;
@@ -126,7 +126,7 @@ public class PanelMove : MonoBehaviour
         if (current_scene.parent_scene_id >= 0)
         {
             // 有上级场景：返回上级
-            player.current_scene_id = current_scene.parent_scene_id;
+            player.EnterScene(current_scene.parent_scene_id);
         }
         else
         {
