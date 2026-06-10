@@ -10,7 +10,10 @@
       "max_stack": 10,
       "effects": [
         { "type": "ModifyFullness", "value": 15 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 2,
@@ -22,7 +25,10 @@
       "max_stack": 10,
       "effects": [
         { "type": "ModifyFullness", "value": 20 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 3,
@@ -34,7 +40,10 @@
       "max_stack": 10,
       "effects": [
         { "type": "ModifyFullness", "value": 25 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 4,
@@ -47,7 +56,10 @@
       "effects": [
         { "type": "ModifyFullness", "value": 30 },
         { "type": "ModifyEnergy", "value": 10 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 5,
@@ -60,7 +72,10 @@
       "effects": [
         { "type": "ModifyFullness", "value": 35 },
         { "type": "ModifyEnergy", "value": 10 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 6,
@@ -73,7 +88,10 @@
       "effects": [
         { "type": "ModifyFullness", "value": 40 },
         { "type": "ModifyEnergy", "value": 15 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 7,
@@ -86,7 +104,10 @@
       "effects": [
         { "type": "ModifyEnergy", "value": 15 },
         { "type": "ModifyHealth", "value": -5 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 8,
@@ -99,7 +120,10 @@
       "effects": [
         { "type": "ModifyEnergy", "value": 20 },
         { "type": "ModifyHealth", "value": -5 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 9,
@@ -112,7 +136,10 @@
       "effects": [
         { "type": "ModifyFullness", "value": 10 },
         { "type": "ModifyHealth", "value": 10 }
-      ]
+      ],
+      "can_use": true,
+      "can_discard": true,
+      "can_trade": false
     },
     {
       "id": 10,
@@ -121,7 +148,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 5,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 11,
@@ -130,7 +160,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 8,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 12,
@@ -139,7 +172,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 6,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 13,
@@ -148,7 +184,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 15,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 14,
@@ -157,7 +196,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 12,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 15,
@@ -166,7 +208,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 10,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 16,
@@ -175,7 +220,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 10,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 17,
@@ -184,7 +232,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 30,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 18,
@@ -193,7 +244,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 25,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     },
     {
       "id": 19,
@@ -202,7 +256,10 @@
       "type": "TradeGood",
       "grade": 0,
       "base_value": 50,
-      "max_stack": 99
+      "max_stack": 99,
+      "can_use": false,
+      "can_discard": true,
+      "can_trade": true
     }
   ]
 }

@@ -72,6 +72,23 @@ public class GameTest : MonoBehaviour
             panel_character.Refresh();
         }
 
+        // 给玩家添加测试物品
+        if (player != null)
+        {
+            // 粗粮饼·九品(id=1) × 5
+            player.AddItem(1, 5);
+            // 阳春面·九品(id=3) × 2
+            player.AddItem(3, 2);
+            // 浊酒·九品(id=7) × 1
+            player.AddItem(7, 1);
+            // 大米(id=10) × 20
+            player.AddItem(10, 20);
+            // 木材(id=12) × 15
+            player.AddItem(12, 15);
+            // 丝绸(id=17) × 3
+            player.AddItem(17, 3);
+        }
+
         Debug.Log("玩家已进入锦安城");
     }
 }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 [Serializable]
 public class ItemEffectJSON
 {
-    public ItemEffectType type;
+    public string type; // 字符串，解析时转为 ItemEffectType
     public float value;
 }
 
@@ -17,7 +17,7 @@ public class ItemEffectJSON
 [Serializable]
 public class ItemPropertyJSON
 {
-    public ItemPropertyType type;
+    public string type; // 字符串，解析时转为 ItemPropertyType
     public float value;
 }
 
@@ -36,6 +36,9 @@ public class ItemDataJSON
     public int max_stack;
     public List<ItemPropertyJSON> properties; // 可选，无则为null
     public List<ItemEffectJSON> effects;      // 可选，无则为null
+    public bool can_use;
+    public bool can_discard;
+    public bool can_trade;
 }
 
 /// <summary>

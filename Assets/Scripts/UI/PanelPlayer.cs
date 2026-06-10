@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
@@ -36,11 +37,25 @@ public class PanelPlayer : MonoBehaviour
         text_satiety = panel.Find("Image_Status/Text_Satiety").GetComponent<TextMeshProUGUI>();
 
         text_money = panel.Find("Text_Money").GetComponent<TextMeshProUGUI>();
+
+        // 绑定头像按钮——打开背包
+        Button button_avatar = panel.Find("Button_Avatar").GetComponent<Button>();
+        button_avatar.onClick.AddListener(OnAvatarClicked);
     }
 
     private void Start()
     {
         Refresh();
+    }
+
+    // 点击头像按钮，打开背包面板
+    private void OnAvatarClicked()
+    {
+        PanelInventory panel_inventory = FindObjectOfType<PanelInventory>(true);
+        if (panel_inventory != null)
+        {
+            panel_inventory.gameObject.SetActive(true);
+        }
     }
 
     /// <summary>
@@ -56,12 +71,12 @@ public class PanelPlayer : MonoBehaviour
 
         text_name.text = player.name;
 
-        text_strength.text = "力量：" + player.GetAttribute(AttributeTypeEnum.Strength);
-        text_agility.text = "敏捷：" + player.GetAttribute(AttributeTypeEnum.Agility);
-        text_wit.text = "才智：" + player.GetAttribute(AttributeTypeEnum.Wit);
-        text_charm.text = "魅力：" + player.GetAttribute(AttributeTypeEnum.Charm);
-        text_physique.text = "体魄：" + player.GetAttribute(AttributeTypeEnum.Physique);
-        text_luck.text = "气运：" + player.GetAttribute(AttributeTypeEnum.Luck);
+        text_strength.text = "力量：" + player.attributes[AttributeTypeEnum.Strength];
+        text_agility.text = "敏捷：" + player.attributes[AttributeTypeEnum.Agility];
+        text_wit.text = "才智：" + player.attributes[AttributeTypeEnum.Wit];
+        text_charm.text = "魅力：" + player.attributes[AttributeTypeEnum.Charm];
+        text_physique.text = "体魄：" + player.attributes[AttributeTypeEnum.Physique];
+        text_luck.text = "气运：" + player.attributes[AttributeTypeEnum.Luck];
 
         text_health.text = "健康：" + (int)player.health + "/" + (int)player.max_health;
         text_energy.text = "精力：" + (int)player.energy + "/" + (int)player.max_energy;

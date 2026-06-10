@@ -22,6 +22,7 @@ public static class EventManager
         PanelAction.OnActionExecuted += OnActionExecuted;
         PanelMove.OnSceneChanged += OnSceneChanged;
         PanelMap.OnLocationChanged += OnLocationChanged;
+        PanelInventory.OnItemUsed += OnItemUsed;
 
         // 缓存面板引用
         CachePanels();
@@ -48,6 +49,11 @@ public static class EventManager
     }
 
     private static void OnLocationChanged()
+    {
+        RefreshAllPanels();
+    }
+
+    private static void OnItemUsed()
     {
         RefreshAllPanels();
     }

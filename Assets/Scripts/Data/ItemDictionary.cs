@@ -72,7 +72,9 @@ public class ItemDictionary : Singleton<ItemDictionary>
             prop_dict = new Dictionary<ItemPropertyType, float>();
             for (int i = 0; i < entry.properties.Count; i++)
             {
-                prop_dict[entry.properties[i].type] = entry.properties[i].value;
+                ItemPropertyType prop_type = (ItemPropertyType)0;
+                Enum.TryParse(entry.properties[i].type, out prop_type);
+                prop_dict[prop_type] = entry.properties[i].value;
             }
         }
 
@@ -83,7 +85,9 @@ public class ItemDictionary : Singleton<ItemDictionary>
             effect_dict = new Dictionary<ItemEffectType, float>();
             for (int i = 0; i < entry.effects.Count; i++)
             {
-                effect_dict[entry.effects[i].type] = entry.effects[i].value;
+                ItemEffectType effect_type = ItemEffectType.ModifyMoney;
+                Enum.TryParse(entry.effects[i].type, out effect_type);
+                effect_dict[effect_type] = entry.effects[i].value;
             }
         }
 
@@ -96,7 +100,10 @@ public class ItemDictionary : Singleton<ItemDictionary>
             base_value: entry.base_value,
             max_stack: entry.max_stack,
             properties: prop_dict,
-            effects: effect_dict
+            effects: effect_dict,
+            can_use: entry.can_use,
+            can_discard: entry.can_discard,
+            can_trade: entry.can_trade
         );
     }
 
