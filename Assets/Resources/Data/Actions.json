@@ -2,35 +2,63 @@
   "actions": [
     {
       "id": 1,
-      "name": "购买交易品"
+      "name": "购买交易品",
+      "effects": [
+        { "type": "ModifyMoney", "money_change": -20 }
+      ]
     },
     {
       "id": 2,
-      "name": "贩卖交易品"
+      "name": "贩卖交易品",
+      "effects": [
+        { "type": "ModifyMoney", "money_change": 25 }
+      ]
     },
     {
       "id": 3,
-      "name": "用膳"
+      "name": "用膳",
+      "effects": [
+        { "type": "ModifyMoney", "money_change": -5 },
+        { "type": "ModifyStatus", "fullness_change": 30 }
+      ]
     },
     {
       "id": 4,
-      "name": "住宿"
+      "name": "住宿",
+      "effects": [
+        { "type": "ModifyMoney", "money_change": -15 },
+        { "type": "ModifyStatus", "energy_change": 100 },
+        { "type": "AdvanceTime", "advance_slots": 7 }
+      ]
     },
     {
       "id": 5,
-      "name": "打工"
+      "name": "打工",
+      "effects": [
+        { "type": "ModifyMoney", "money_change": 10 },
+        { "type": "ModifyStatus", "energy_change": -20, "fullness_change": -10 }
+      ]
     },
     {
       "id": 6,
-      "name": "舍饭"
+      "name": "舍饭",
+      "effects": [
+        { "type": "ModifyStatus", "fullness_change": 15 }
+      ]
     },
     {
       "id": 7,
-      "name": "借宿"
+      "name": "借宿",
+      "effects": [
+        { "type": "ModifyStatus", "energy_change": 30 }
+      ]
     },
     {
       "id": 8,
-      "name": "闲逛"
+      "name": "闲逛",
+      "effects": [
+        { "type": "ModifyStatus", "energy_change": -5 }
+      ]
     }
   ]
 }

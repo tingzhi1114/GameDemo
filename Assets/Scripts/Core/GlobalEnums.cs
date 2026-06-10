@@ -53,6 +53,19 @@ public enum ItemPropertyType
 {
 }
 
+// 行动效果类型（行动可执行的各类原子效果）
+public enum ActionEffectTypeEnum
+{
+    ModifyMoney,        // 修改金钱
+    ModifyAttribute,    // 修改六维属性
+    ModifyStatus,       // 修改状态（健康/精力/饱腹）
+    GainItem,           // 获得物品
+    LoseItem,           // 失去物品
+    OpenPanel,          // 打开面板
+    TriggerEvent,       // 触发事件
+    AdvanceTime         // 推进时间
+}
+
 // 物品效果类型（使用物品时执行的各项效果）
 public enum ItemEffectType
 {
