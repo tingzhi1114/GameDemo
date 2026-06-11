@@ -11,9 +11,13 @@ using System.Collections.Generic;
 public class PanelTrade : MonoBehaviour
 {
     /// <summary>
-    /// 交易执行后触发，EventManager订阅此事件
+    /// 购买完成后触发，EventManager订阅此事件
     /// </summary>
-    public static event System.Action OnTradeExecuted;
+    public static event System.Action OnBuyExecuted;
+    /// <summary>
+    /// 出售完成后触发，EventManager订阅此事件
+    /// </summary>
+    public static event System.Action OnSellExecuted;
 
     // 在Inspector中拖入 Button_Item_Trade 预制体
     public GameObject button_item_trade_prefab;
@@ -27,6 +31,9 @@ public class PanelTrade : MonoBehaviour
     private TextMeshProUGUI detail_status;
     private Button button_buy_action;
     private Button button_sell_action;
+    private Button button_process_mode;
+    private PanelBatchProcess batch_process;
+    private TextMeshProUGUI text_money;
     private TextMeshProUGUI text_title;
     private TextMeshProUGUI text_list_title;
 
@@ -116,14 +123,48 @@ public class PanelTrade : MonoBehaviour
         button_buy_action.onClick.AddListener(OnBuyClicked);
         button_sell_action.onClick.AddListener(OnSellClicked);
 
+        // 批量模式切换按钮（递归查找任意深度的Button_ProcessMode）
+        button_process_mode = FindDeepChild<Button>(this.transform, "Button_ProcessMode");
+        if (button_process_mode != null)
+        {
+            button_process_mode.onClick.AddListener(ToggleProcessMode);
+        }
+
+        // 批量处理弹窗
+        batch_process = FindOrCreateBatchProcess();
+
+        // 金钱显示
+        Transform money_trans = panel.Find("Image_Money");
+        if (money_trans != null)
+        {
+            text_money = money_trans.Find("Text_Money")?.GetComponent<TextMeshProUGUI>();
+        }
+
         // 初始隐藏详情
         detail_panel.SetActive(false);
+    }
+
+    // 刷新金钱显示
+    private void RefreshMoney()
+    {
+        if (text_money == null) return;
+        CharacterData player = Player.Instance.GetCharacter();
+        if (player != null)
+        {
+            text_money.text = "金钱：" + player.money;
+        }
     }
 
     private void OnEnable()
     {
         // 清除选中状态，以干净状态展示
         DeselectItem();
+
+        // 更新批量模式按钮文字
+        UpdateProcessModeButton();
+
+        // 刷新金钱显示
+        RefreshMoney();
 
         // 每次激活时刷新显示
         if (is_buy_mode && buy_item_ids != null)
@@ -134,6 +175,161 @@ public class PanelTrade : MonoBehaviour
         {
             Refresh();
         }
+    }
+
+    // 切换批量/单个模式
+    private void ToggleProcessMode()
+    {
+        Player.Instance.is_batch_mode = !Player.Instance.is_batch_mode;
+        UpdateProcessModeButton();
+    }
+
+    // 更新批量模式按钮文字
+    private void UpdateProcessModeButton()
+    {
+        if (button_process_mode != null)
+        {
+            TextMeshProUGUI btn_text = button_process_mode.GetComponentInChildren<TextMeshProUGUI>();
+            if (btn_text != null)
+            {
+                btn_text.text = Player.Instance.is_batch_mode ? "批量模式" : "单个模式";
+            }
+        }
+    }
+
+    // 查找场景中已存在的批量处理弹窗（非激活状态）
+    private PanelBatchProcess FindOrCreateBatchProcess()
+    {
+        PanelBatchProcess bp = Object.FindObjectOfType<PanelBatchProcess>(true);
+        if (bp != null)
+        {
+            bp.gameObject.SetActive(false);
+        }
+        return bp;
+    }
+
+    // ==================== 价格重新计算 & 批量累进总价 ====================
+
+    // 获取当前场景中选中物品的价格计算参数
+    private void GetCurrentItemPriceParams(out ItemData template, out int stock, out int target,
+        out float prod_coeff, out float z1, out float z2)
+    {
+        template = ItemDictionary.Instance.Get(selected_item_id);
+        stock = 0;
+        target = 0;
+        prod_coeff = 0f;
+        z1 = 0f;
+        z2 = 0f;
+
+        if (template == null || current_trade_scene == null) return;
+
+        stock = current_trade_scene.GetStock(selected_item_id);
+        if (current_trade_scene.target_stock != null && current_trade_scene.target_stock.ContainsKey(selected_item_id))
+            target = current_trade_scene.target_stock[selected_item_id];
+
+        LocationData location = LocationDictionary.Instance.Get(current_trade_scene.location_id);
+        if (location != null)
+        {
+            if (location.productivity != null && location.productivity.ContainsKey(selected_item_id))
+                prod_coeff = location.productivity[selected_item_id];
+            z1 = LocationDictionary.Instance.GetZ1(location.id, selected_item_id);
+            z2 = LocationDictionary.Instance.GetZ2(location.id, selected_item_id);
+        }
+    }
+
+    // 重新计算选中物品的当前买入价
+    private void RecalculateBuyPrice()
+    {
+        ItemData template;
+        int stock, target;
+        float prod_coeff, z1, z2;
+        GetCurrentItemPriceParams(out template, out stock, out target, out prod_coeff, out z1, out z2);
+        if (template != null)
+        {
+            selected_price = template.GetPrice(stock, target, prod_coeff, z1, z2);
+        }
+    }
+
+    // 重新计算选中物品的当前卖出价
+    private void RecalculateSellPrice()
+    {
+        ItemData template;
+        int stock, target;
+        float prod_coeff, z1, z2;
+        GetCurrentItemPriceParams(out template, out stock, out target, out prod_coeff, out z1, out z2);
+        if (template != null)
+        {
+            int buy_price = template.GetPrice(stock, target, prod_coeff, z1, z2);
+            selected_price = ClampPrice(Mathf.RoundToInt(buy_price * sell_rate), template.base_value);
+        }
+    }
+
+    // 计算批量买入的累进总价（每次购买后库存减少，价格变化）
+    // 返回富文本带颜色（总价根据平均单价 vs 标准价着色）
+    private string CalcBatchBuyTotal(int count)
+    {
+        ItemData template;
+        int stock, target;
+        float prod_coeff, z1, z2;
+        GetCurrentItemPriceParams(out template, out stock, out target, out prod_coeff, out z1, out z2);
+        if (template == null || count <= 0) return "总价：0";
+
+        int total = 0;
+        for (int i = 0; i < count; i++)
+        {
+            int p = template.GetPrice(stock - i, target, prod_coeff, z1, z2);
+            if (p <= 0) break;
+            total += p;
+        }
+
+        // 按平均单价着色
+        int avg = total / count;
+        int base_val = template.base_value;
+        Color c = GetPriceColor(avg, base_val);
+        string hex = ColorToHex(c);
+        return "总价：<color=#" + hex + ">" + total + "</color>";
+    }
+
+    // 计算批量出售的累进总价（每次出售库存增加，卖出价变化）
+    // 返回富文本带颜色（总价根据平均单价 vs 标准价着色）
+    private string CalcBatchSellTotal(int count)
+    {
+        ItemData template;
+        int stock, target;
+        float prod_coeff, z1, z2;
+        GetCurrentItemPriceParams(out template, out stock, out target, out prod_coeff, out z1, out z2);
+        if (template == null || count <= 0) return "总价：0";
+
+        int total = 0;
+        for (int i = 0; i < count; i++)
+        {
+            int buy_price = template.GetPrice(stock + i, target, prod_coeff, z1, z2);
+            int sell_price = ClampPrice(Mathf.RoundToInt(buy_price * sell_rate), template.base_value);
+            total += sell_price;
+        }
+
+        // 按平均单价着色
+        int avg = total / count;
+        int base_val = template.base_value;
+        Color c = GetPriceColor(avg, base_val);
+        string hex = ColorToHex(c);
+        return "总价：<color=#" + hex + ">" + total + "</color>";
+    }
+
+    // 在指定父节点下递归查找指定名称的组件
+    private T FindDeepChild<T>(Transform parent, string name) where T : Component
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+            {
+                T component = child.GetComponent<T>();
+                if (component != null) return component;
+            }
+            T result = FindDeepChild<T>(child, name);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     /// <summary>
@@ -147,12 +343,12 @@ public class PanelTrade : MonoBehaviour
             return;
         }
 
-        // 获取场景所属地点的价格乘数
+        // 获取场景所属地点的生产力系数和地缘参数
         LocationData location = LocationDictionary.Instance.Get(scene.location_id);
-        Dictionary<int, float> multipliers = null;
+        Dictionary<int, float> productivity = null;
         if (location != null)
         {
-            multipliers = location.price_multipliers;
+            productivity = location.productivity;
         }
 
         // 构建买入商品ID列表和价格字典
@@ -169,13 +365,30 @@ public class PanelTrade : MonoBehaviour
                 continue;
             }
 
-            // 计算价格 = 基准价值 × 地点价格乘数（默认1.0）
-            float multiplier = 1.0f;
-            if (multipliers != null && multipliers.ContainsKey(item_id))
+            // 获取当前库存和期望库存
+            int stock = scene.GetStock(item_id);
+            int target = 0;
+            if (scene.target_stock != null && scene.target_stock.ContainsKey(item_id))
             {
-                multiplier = multipliers[item_id];
+                target = scene.target_stock[item_id];
             }
-            int price = Mathf.RoundToInt(template.base_value * multiplier);
+            // 获取生产力系数（默认0）
+            float prod_coeff = 0f;
+            if (productivity != null && productivity.ContainsKey(item_id))
+            {
+                prod_coeff = productivity[item_id];
+            }
+
+            // 获取 Z1、Z2（默认0）
+            float z1 = 0f, z2 = 0f;
+            if (location != null)
+            {
+                z1 = LocationDictionary.Instance.GetZ1(location.id, item_id);
+                z2 = LocationDictionary.Instance.GetZ2(location.id, item_id);
+            }
+
+            // 计算动态价格
+            int price = template.GetPrice(stock, target, prod_coeff, z1, z2);
 
             buy_item_ids.Add(item_id);
             buy_prices[item_id] = price;
@@ -196,6 +409,7 @@ public class PanelTrade : MonoBehaviour
 
         // 从场景模板获取允许售卖的类型
         SceneData scene = SceneDictionary.Instance.Get(scene_id);
+        this.current_trade_scene = scene;
         if (scene != null)
         {
             SceneTemplateData template = SceneTemplateDictionary.Instance.Get(scene.template_id);
@@ -344,11 +558,53 @@ public class PanelTrade : MonoBehaviour
                 continue;
             }
 
-            // 计算卖出价 = 标准价值 × 卖出倍率
-            int price = Mathf.RoundToInt(template.base_value * sell_rate);
+            // 根据当前场景计算卖出价 = 商店购入价 × 卖出倍率
+            int price = CalculateSellPrice(item_id, template, total_count);
 
             CreateItemButton(template, price, total_count);
         }
+    }
+
+    // 根据当前场景计算某物品的卖出价
+    private int CalculateSellPrice(int item_id, ItemData template, int player_count)
+    {
+        if (current_trade_scene == null)
+        {
+            // 没有场景上下文时按基准价算
+            int fallback = Mathf.RoundToInt(template.base_value * sell_rate);
+            return ClampPrice(fallback, template.base_value);
+        }
+
+        // 获取场景所属地点的参数
+        LocationData location = LocationDictionary.Instance.Get(current_trade_scene.location_id);
+
+        // 从场景库存中获取当前库存和期望库存
+        int stock = current_trade_scene.GetStock(item_id);
+        int target = 0;
+        if (current_trade_scene.target_stock != null && current_trade_scene.target_stock.ContainsKey(item_id))
+        {
+            target = current_trade_scene.target_stock[item_id];
+        }
+
+        // 生产力系数
+        float prod_coeff = 0f;
+        if (location != null && location.productivity != null && location.productivity.ContainsKey(item_id))
+        {
+            prod_coeff = location.productivity[item_id];
+        }
+
+        // Z1、Z2
+        float z1 = 0f, z2 = 0f;
+        if (location != null)
+        {
+            z1 = LocationDictionary.Instance.GetZ1(location.id, item_id);
+            z2 = LocationDictionary.Instance.GetZ2(location.id, item_id);
+        }
+
+        // 先算商店买入价，再打折
+        int buy_price = template.GetPrice(stock, target, prod_coeff, z1, z2);
+        int sell_price = Mathf.RoundToInt(buy_price * sell_rate);
+        return ClampPrice(sell_price, template.base_value);
     }
 
     // 创建一个物品按钮（买入/卖出模式共用）
@@ -540,8 +796,16 @@ public class PanelTrade : MonoBehaviour
             return;
         }
 
-        // 名称 + 品级
-        detail_name.text = template.name + " · " + GetGradeName(template.grade);
+        // 名称 + 品级（无品级不显示" · "）
+        string grade_str = GetGradeName(template.grade);
+        if (!string.IsNullOrEmpty(grade_str))
+        {
+            detail_name.text = template.name + " · " + grade_str;
+        }
+        else
+        {
+            detail_name.text = template.name;
+        }
 
         // 描述 + 限制后缀
         detail_desc.text = "描述：" + template.description + BuildRestrictionSuffix(template);
@@ -584,7 +848,7 @@ public class PanelTrade : MonoBehaviour
         detail_panel.SetActive(true);
     }
 
-    // 点击买入按钮
+    // 点击买入按钮（批量模式弹出弹窗）
     private void OnBuyClicked()
     {
         if (selected_item_id < 0)
@@ -598,48 +862,110 @@ public class PanelTrade : MonoBehaviour
             return;
         }
 
-        // 检查钱是否够
+        // 批量模式 → 弹窗
+        if (Player.Instance.is_batch_mode)
+        {
+            int max_count = current_trade_scene != null ? current_trade_scene.GetStock(selected_item_id) : 0;
+            if (max_count <= 0) return;
+
+            // 检查能买多少（看钱）
+            int max_by_money = player.money / selected_price;
+            if (max_by_money < max_count) max_count = max_by_money;
+            if (max_count <= 0)
+            {
+                Debug.Log(player.name + "囊中羞涩，买不起。");
+                return;
+            }
+            if (max_count <= 1)
+            {
+                // 只能买1个时直接执行
+                ExecuteBuyOnce(player);
+                OnBuyExecuted?.Invoke();
+                RefreshMoney();
+                HandleBuyComplete();
+                return;
+            }
+
+            // 总价由 anotherBuilder 动态更新（累进计算，每次购买后库存减少，价格变化）
+            if (batch_process != null)
+            {
+                batch_process.Show("购买", max_count, (count) =>
+                {
+                    CharacterData latest_player = Player.Instance.GetCharacter();
+                    if (latest_player == null) return;
+
+                    int total_cost = selected_price * count;
+                    if (latest_player.money < total_cost)
+                    {
+                        Debug.Log("钱不够，只能买一部分。");
+                        int can_afford = latest_player.money / selected_price;
+                        if (can_afford <= 0) return;
+                        count = can_afford;
+                    }
+
+                    if (current_trade_scene != null)
+                    {
+                        int actual_stock = current_trade_scene.GetStock(selected_item_id);
+                        if (count > actual_stock) count = actual_stock;
+                    }
+                    if (count <= 0) return;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        ExecuteBuyOnce(latest_player);
+                    }
+                    OnBuyExecuted?.Invoke();
+                    RefreshMoney();
+                    HandleBuyComplete();
+                },
+                CalcBatchBuyTotal
+                );
+            }
+            return;
+        }
+
+        // 单个模式
         if (player.money < selected_price)
         {
             Debug.Log(player.name + "囊中羞涩，买不起。");
             return;
         }
 
-        // 扣钱 + 给物品 + 扣减商店库存
+        ExecuteBuyOnce(player);
+        OnBuyExecuted?.Invoke();
+        RefreshMoney();
+        HandleBuyComplete();
+    }
+
+    // 执行一次购买
+    private void ExecuteBuyOnce(CharacterData player)
+    {
         player.money -= selected_price;
         InventoryDictionary.Instance.GetOrCreate(player.id).AddItem(selected_item_id, 1);
         if (current_trade_scene != null)
         {
             current_trade_scene.RemoveStock(selected_item_id, 1);
         }
+    }
 
-        ItemData template = ItemDictionary.Instance.Get(selected_item_id);
-        if (template != null)
-        {
-            Debug.Log(player.name + "花费" + selected_price + "文钱购买了" + template.name + "。");
-        }
-
-        // 触发全局刷新事件
-        OnTradeExecuted?.Invoke();
-
-        // 检查库存是否为0（购买后被买空）
+    // 购买后的通用处理
+    private void HandleBuyComplete()
+    {
         bool stock_gone = current_trade_scene == null || current_trade_scene.GetStock(selected_item_id) <= 0;
-
         if (stock_gone)
         {
-            // 卖光了：取消选中并刷新
             DeselectItem();
             Refresh();
         }
         else
         {
-            // 还有库存：只更新按钮数量和详情文本，不重建
+            RecalculateBuyPrice();
             UpdateItemButton(selected_button, selected_item_id, selected_price);
             ShowDetail(selected_item_id);
         }
     }
 
-    // 点击卖出按钮
+    // 点击卖出按钮（批量模式弹出弹窗）
     private void OnSellClicked()
     {
         if (selected_item_id < 0)
@@ -659,27 +985,71 @@ public class PanelTrade : MonoBehaviour
             return;
         }
 
-        // 移除物品 + 加钱
+        // 批量模式 → 弹窗
+        if (Player.Instance.is_batch_mode)
+        {
+            int max_count = InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id);
+            if (max_count <= 0) return;
+            if (max_count <= 1)
+            {
+                ExecuteSellOnce(player);
+                OnSellExecuted?.Invoke();
+                RefreshMoney();
+                HandleSellComplete();
+                return;
+            }
+
+            if (batch_process != null)
+            {
+                batch_process.Show("出售", max_count, (count) =>
+                {
+                    CharacterData latest_player = Player.Instance.GetCharacter();
+                    if (latest_player == null) return;
+
+                    int actual_count = InventoryDictionary.Instance.GetOrCreate(latest_player.id).GetCount(selected_item_id);
+                    if (count > actual_count) count = actual_count;
+                    if (count <= 0) return;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        ExecuteSellOnce(latest_player);
+                    }
+                    OnSellExecuted?.Invoke();
+                    RefreshMoney();
+                    HandleSellComplete();
+                },
+                CalcBatchSellTotal
+                );
+            }
+            return;
+        }
+
+        // 单个模式
+        ExecuteSellOnce(player);
+        OnSellExecuted?.Invoke();
+        RefreshMoney();
+        HandleSellComplete();
+    }
+
+    // 执行一次出售
+    private void ExecuteSellOnce(CharacterData player)
+    {
         InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
         player.money += selected_price;
+    }
 
-        Debug.Log(player.name + "出售了" + template.name + "，获得" + selected_price + "文钱。");
-
-        // 触发全局刷新事件
-        OnTradeExecuted?.Invoke();
-
-        // 检查选中物品在背包中是否还有剩余
-        bool still_exists = InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0;
-
+    // 出售后的通用处理
+    private void HandleSellComplete()
+    {
+        bool still_exists = InventoryDictionary.Instance.GetOrCreate(Player.Instance.GetCharacter().id).GetCount(selected_item_id) > 0;
         if (still_exists)
         {
-            // 还有剩余：只更新按钮数量和详情文本，不重建
+            RecalculateSellPrice();
             UpdateItemButton(selected_button, selected_item_id, selected_price);
             ShowDetail(selected_item_id);
         }
         else
         {
-            // 卖光了：取消选中并刷新
             DeselectItem();
             Refresh();
         }
@@ -728,7 +1098,18 @@ public class PanelTrade : MonoBehaviour
         }
     }
 
-    // 根据价格与价值的比值获取着色颜色
+    // 将价格限制在 [基准 × 下限, 基准 × 上限] 范围内
+    public static int ClampPrice(int price, int base_value)
+    {
+        Config config = Config.Instance;
+        int floor = Mathf.RoundToInt(base_value * config.price_floor_ratio);
+        int cap = Mathf.RoundToInt(base_value * config.price_cap_ratio);
+        if (price < floor) price = floor;
+        if (price > cap) price = cap;
+        return price;
+    }
+
+    // 根据价格与价值的比值获取着色颜色，且应用价格上下限
     public static Color GetPriceColor(int price, int base_value)
     {
         if (base_value <= 0)
@@ -737,28 +1118,24 @@ public class PanelTrade : MonoBehaviour
         }
 
         float ratio = (float)price / (float)base_value;
+        Config config = Config.Instance;
 
-        // 低于60%：深绿色
-        if (ratio <= 0.4f)
+        if (ratio <= config.price_color_deep_green)
         {
             return new Color(0f, 0.5f, 0f);
         }
-        // 低于30%：浅绿色
-        else if (ratio <= 0.7f)
+        else if (ratio <= config.price_color_light_green)
         {
             return new Color(0.4f, 0.8f, 0.2f);
         }
-        // 接近价值 ±30%：白色
-        else if (ratio < 1.3f)
+        else if (ratio < config.price_color_orange)
         {
             return Color.white;
         }
-        // 高于30%：橙色
-        else if (ratio < 1.6f)
+        else if (ratio < config.price_color_red)
         {
             return new Color(1f, 0.6f, 0f);
         }
-        // 高于60%：红色
         else
         {
             return Color.red;

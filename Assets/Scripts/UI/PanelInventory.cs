@@ -24,6 +24,8 @@ public class PanelInventory : MonoBehaviour
     private TextMeshProUGUI detail_status;
     private Button button_use;
     private Button button_discard;
+    private Button button_process_mode;
+    private PanelBatchProcess batch_process;    // 弹窗引用
 
     // 当前筛选类型（-1=全部）
     private int current_filter = -1;
@@ -95,12 +97,54 @@ public class PanelInventory : MonoBehaviour
         button_use.onClick.AddListener(OnUseClicked);
         button_discard.onClick.AddListener(OnDiscardClicked);
 
+        // 批量模式切换按钮（递归查找任意深度的Button_ProcessMode）
+        button_process_mode = FindDeepChild<Button>(this.transform, "Button_ProcessMode");
+        if (button_process_mode != null)
+        {
+            button_process_mode.onClick.AddListener(ToggleProcessMode);
+        }
+
+        // 批量处理弹窗
+        batch_process = FindOrCreateBatchProcess();
+
         // 初始隐藏详情
         detail_panel.SetActive(false);
     }
 
+    // 查找场景中已存在的批量处理弹窗（非激活状态）
+    private PanelBatchProcess FindOrCreateBatchProcess()
+    {
+        PanelBatchProcess bp = Object.FindObjectOfType<PanelBatchProcess>(true);
+        if (bp != null)
+        {
+            bp.gameObject.SetActive(false);
+        }
+        return bp;
+    }
+
+    // 切换批量/单个模式
+    private void ToggleProcessMode()
+    {
+        Player.Instance.is_batch_mode = !Player.Instance.is_batch_mode;
+        UpdateProcessModeButton();
+    }
+
+    // 更新批量模式按钮文字
+    private void UpdateProcessModeButton()
+    {
+        if (button_process_mode != null)
+        {
+            TextMeshProUGUI btn_text = button_process_mode.GetComponentInChildren<TextMeshProUGUI>();
+            if (btn_text != null)
+            {
+                btn_text.text = Player.Instance.is_batch_mode ? "批量模式" : "单个模式";
+            }
+        }
+    }
+
     private void OnEnable()
     {
+        UpdateProcessModeButton();
         Refresh();
     }
 
@@ -179,6 +223,22 @@ public class PanelInventory : MonoBehaviour
         // 取消当前物品选中，刷新列表
         DeselectItem();
         Refresh();
+    }
+
+    // 在指定父节点下递归查找指定名称的组件
+    private T FindDeepChild<T>(Transform parent, string name) where T : Component
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+            {
+                T component = child.GetComponent<T>();
+                if (component != null) return component;
+            }
+            T result = FindDeepChild<T>(child, name);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     /// <summary>
@@ -325,8 +385,16 @@ public class PanelInventory : MonoBehaviour
             return;
         }
 
-        // 名称 + 品级
-        detail_name.text = template.name + " · " + GetGradeName(template.grade);
+        // 名称 + 品级（无品级不显示" · "）
+        string grade_str = GetGradeName(template.grade);
+        if (!string.IsNullOrEmpty(grade_str))
+        {
+            detail_name.text = template.name + " · " + grade_str;
+        }
+        else
+        {
+            detail_name.text = template.name;
+        }
 
         // 描述 + 限制后缀
         detail_desc.text = "描述：" + template.description + BuildRestrictionSuffix(template);
@@ -385,7 +453,7 @@ public class PanelInventory : MonoBehaviour
     }
 
     /// <summary>
-    /// 点击使用按钮——执行效果并移除一个
+    /// 点击使用按钮——执行效果并移除一个（批量模式弹出弹窗）
     /// </summary>
     private void OnUseClicked()
     {
@@ -400,116 +468,101 @@ public class PanelInventory : MonoBehaviour
             return;
         }
 
-        // 获取模板
         ItemData template = ItemDictionary.Instance.Get(selected_item_id);
         if (template == null || template.effects == null)
         {
             return;
         }
 
-        // 执行所有效果
-        foreach (KeyValuePair<ItemEffectType, float> kv in template.effects)
+        // 批量模式 → 弹窗
+        if (Player.Instance.is_batch_mode)
         {
-            ApplyEffect(player, kv.Key, kv.Value);
+            int max_count = InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id);
+            if (max_count <= 1)
+            {
+                // 只有1个时直接执行，不弹窗
+                ExecuteUseOnce(player, template);
+                return;
+            }
+
+            // 效果累计由 anotherBuilder 动态更新
+            if (batch_process != null)
+            {
+                batch_process.Show("使用", max_count, (count) =>
+                {
+                    CharacterData latest_player = Player.Instance.GetCharacter();
+                    if (latest_player == null) return;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        ExecuteUseOnce(latest_player, template);
+                    }
+
+                    if (OnItemUsed != null) OnItemUsed();
+
+                    if (InventoryDictionary.Instance.GetOrCreate(latest_player.id).GetCount(selected_item_id) > 0)
+                    {
+                        UpdateButtonCount(selected_button, selected_item_id);
+                        ShowDetail(selected_item_id, selected_item_instance);
+                    }
+                    else
+                    {
+                        DeselectItem();
+                        Refresh();
+                    }
+                },
+                (c) => BuildEffectAccumulation(template.effects, c)
+                );
+            }
+            return;
         }
 
-        // 移除一个
-        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
+        // 单个模式
+        ExecuteUseOnce(player, template);
+        if (OnItemUsed != null) OnItemUsed();
 
-        // 通知其他面板刷新
-        if (OnItemUsed != null)
-        {
-            OnItemUsed();
-        }
-
-        // 检查是否还有剩余
         if (InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0)
         {
-            // 有剩余：更新选中按钮的数量文本 + 刷新详情，但不重建列表
             UpdateButtonCount(selected_button, selected_item_id);
             ShowDetail(selected_item_id, selected_item_instance);
         }
         else
         {
-            // 无剩余：取消选中并刷新
             DeselectItem();
             Refresh();
         }
     }
 
-    /// <summary>
-    /// 应用单个物品效果到角色
-    /// </summary>
-    private void ApplyEffect(CharacterData character, ItemEffectType type, float value)
+    // 执行一次使用效果并移除一个物品
+    private void ExecuteUseOnce(CharacterData player, ItemData template)
     {
-        if (type == ItemEffectType.ModifyMoney)
+        foreach (KeyValuePair<ItemEffectType, float> kv in template.effects)
         {
-            character.money = character.money + (int)value;
+            ItemEffectExecutor.Execute(player, kv.Key, kv.Value);
         }
-        else if (type == ItemEffectType.ModifyHealth)
+        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(template.id, 1);
+    }
+
+    // 构建效果累计文本（如"饱腹+50  精力+20"）
+    private string BuildEffectAccumulation(Dictionary<ItemEffectType, float> effects, int multiplier)
+    {
+        if (effects == null || effects.Count == 0)
         {
-            character.health = character.health + value;
-            if (character.health > character.max_health)
-            {
-                character.health = character.max_health;
-            }
-            if (character.health < 0f)
-            {
-                character.health = 0f;
-            }
+            return "";
         }
-        else if (type == ItemEffectType.ModifyEnergy)
+
+        string text = "";
+        foreach (KeyValuePair<ItemEffectType, float> kv in effects)
         {
-            character.energy = character.energy + value;
-            if (character.energy > character.max_energy)
-            {
-                character.energy = character.max_energy;
-            }
-            if (character.energy < 0f)
-            {
-                character.energy = 0f;
-            }
+            float total = kv.Value * (multiplier > 0 ? multiplier : 1);
+            string sign = total >= 0f ? "+" : "";
+            text += GetEffectName(kv.Key) + " " + sign + total + "  ";
         }
-        else if (type == ItemEffectType.ModifyFullness)
-        {
-            character.fullness = character.fullness + value;
-            if (character.fullness > character.max_fullness)
-            {
-                character.fullness = character.max_fullness;
-            }
-            if (character.fullness < 0f)
-            {
-                character.fullness = 0f;
-            }
-        }
-        else if (type == ItemEffectType.ModifyStrength)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Strength, value);
-        }
-        else if (type == ItemEffectType.ModifyAgility)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Agility, value);
-        }
-        else if (type == ItemEffectType.ModifyWit)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Wit, value);
-        }
-        else if (type == ItemEffectType.ModifyCharm)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Charm, value);
-        }
-        else if (type == ItemEffectType.ModifyPhysique)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Physique, value);
-        }
-        else if (type == ItemEffectType.ModifyLuck)
-        {
-            character.ModifyAttribute(AttributeTypeEnum.Luck, value);
-        }
+        return text.Trim();
     }
 
     /// <summary>
-    /// 点击丢弃按钮
+    /// 点击丢弃按钮——移除一个（批量模式弹出弹窗）
     /// </summary>
     private void OnDiscardClicked()
     {
@@ -524,21 +577,72 @@ public class PanelInventory : MonoBehaviour
             return;
         }
 
-        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
+        // 批量模式 → 弹窗  
+        if (Player.Instance.is_batch_mode)
+        {
+            int max_count = InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id);
+            if (max_count <= 1)
+            {
+                ExecuteDiscardOnce(player);
+                // 检查剩余
+                if (InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0)
+                {
+                    UpdateButtonCount(selected_button, selected_item_id);
+                    ShowDetail(selected_item_id, selected_item_instance);
+                }
+                else
+                {
+                    DeselectItem();
+                    Refresh();
+                }
+                return;
+            }
 
-        // 检查是否还有剩余
+            if (batch_process != null)
+            {
+                batch_process.Show("丢弃", max_count, (count) =>
+                {
+                    CharacterData latest_player = Player.Instance.GetCharacter();
+                    if (latest_player == null) return;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        ExecuteDiscardOnce(latest_player);
+                    }
+
+                    if (InventoryDictionary.Instance.GetOrCreate(latest_player.id).GetCount(selected_item_id) > 0)
+                    {
+                        UpdateButtonCount(selected_button, selected_item_id);
+                        ShowDetail(selected_item_id, selected_item_instance);
+                    }
+                    else
+                    {
+                        DeselectItem();
+                        Refresh();
+                    }
+                });
+            }
+            return;
+        }
+
+        // 单个模式
+        ExecuteDiscardOnce(player);
         if (InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0)
         {
-            // 有剩余：更新选中按钮的数量文本 + 刷新详情，但不重建列表
             UpdateButtonCount(selected_button, selected_item_id);
             ShowDetail(selected_item_id, selected_item_instance);
         }
         else
         {
-            // 无剩余：取消选中并刷新
             DeselectItem();
             Refresh();
         }
+    }
+
+    // 执行一次丢弃
+    private void ExecuteDiscardOnce(CharacterData player)
+    {
+        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
     }
 
     /// <summary>

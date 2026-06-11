@@ -103,6 +103,14 @@ public class SceneDictionary : Singleton<SceneDictionary>
     }
 
     /// <summary>
+    /// 获取所有场景的枚举器
+    /// </summary>
+    public System.Collections.Generic.Dictionary<int, SceneData>.ValueCollection GetAll()
+    {
+        return this.all_scenes.Values;
+    }
+
+    /// <summary>
     /// 根据ID获取场景，找不到返回null
     /// </summary>
     public SceneData Get(int id)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// 物品数据模型——存储一个物品的核心信息
@@ -31,6 +32,8 @@ public class ItemData
     public bool can_discard;
     // 是否可交易
     public bool can_trade;
+    // 弹性系数（价格受库存影响的敏感度，值越大价格波动越剧烈）
+    public float elasticity;
 
     /// <summary>
     /// 构造一个物品
@@ -48,7 +51,8 @@ public class ItemData
         Dictionary<ItemEffectType, float> effects,
         bool can_use = false,
         bool can_discard = false,
-        bool can_trade = false
+        bool can_trade = false,
+        float elasticity = 0f
     )
     {
         this.id = id;
@@ -64,6 +68,7 @@ public class ItemData
         this.can_use = can_use;
         this.can_discard = can_discard;
         this.can_trade = can_trade;
+        this.elasticity = elasticity;
     }
 
     /// <summary>
@@ -145,7 +150,46 @@ public class ItemData
             effects: effect_copy,
             can_use: this.can_use,
             can_discard: this.can_discard,
-            can_trade: this.can_trade
+            can_trade: this.can_trade,
+            elasticity: this.elasticity
         );
+    }
+
+    /// <summary>
+    /// 根据当前库存、期望库存、生产力、Z1（邻居）、Z2（两步邻居）计算动态价格
+    /// 公式：B = 1 - (p-0.5)×0.4 - (Z1×0.3+Z2×0.1)×0.4
+    ///       p_mult = B × exp(γ × (1-r) × e)，clamp [0.2, 3.0]
+    ///       Buy = Base × p_mult
+    /// </summary>
+    public int GetPrice(int stock, int target, float productivity, float z1 = 0f, float z2 = 0f)
+    {
+        if (target <= 0)
+        {
+            return PanelTrade.ClampPrice(this.base_value, this.base_value);
+        }
+
+        // ratio = 库存/期望库存，限定[0.3, 3.0]
+        float ratio = (float)stock / (float)target;
+        if (ratio < 0.3f) ratio = 0.3f;
+        if (ratio > 3.0f) ratio = 3.0f;
+
+        // 弹性系数受 Config 上下限限制
+        float e = this.elasticity;
+        if (e < Config.Instance.elasticity_min) e = Config.Instance.elasticity_min;
+        if (e > Config.Instance.elasticity_max) e = Config.Instance.elasticity_max;
+
+        Config cfg = Config.Instance;
+
+        // 静态地缘基准系数 B = 1 - (p-0.5)×0.4 - (Z1×0.3+Z2×0.1)×0.4
+        float B = 1f - (productivity - 0.5f) * 0.4f - (z1 * 0.3f + z2 * 0.1f) * 0.4f;
+
+        // 最终价格系数 p_mult = B × exp(γ × (1-r) × e)，clamp [0.2, 3.0]
+        float exponent = cfg.gamma * (1f - ratio) * e;
+        float p_mult = B * Mathf.Exp(exponent);
+        if (p_mult < 0.2f) p_mult = 0.2f;
+        if (p_mult > cfg.price_cap_ratio) p_mult = cfg.price_cap_ratio;
+
+        int price = Mathf.RoundToInt(this.base_value * p_mult);
+        return PanelTrade.ClampPrice(price, this.base_value);
     }
 }

@@ -5,10 +5,13 @@ public class Player : Singleton<Player>
 {
     // 玩家对应的角色ID（指向CharacterDictionary中的某个CharacterData）
     public int character_id;
+    // 批量处理模式开关（true=批量, false=单个）
+    public bool is_batch_mode;
 
     private Player()
     {
         this.character_id = -1;
+        this.is_batch_mode = false;
     }
 
     /// <summary>

@@ -40,6 +40,7 @@ public class ItemDataJSON
     public bool can_use;
     public bool can_discard;
     public bool can_trade;
+    public float elasticity;            // 价格弹性系数，0=不受库存影响，越大波动越剧烈
 }
 
 /// <summary>

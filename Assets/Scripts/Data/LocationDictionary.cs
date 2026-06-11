@@ -57,6 +57,71 @@ public class LocationDictionary : Singleton<LocationDictionary>
     }
 
     /// <summary>
+    /// 实时计算指定地点指定物品的 Z1（直接邻居平均生产力）
+    /// </summary>
+    public float GetZ1(int location_id, int item_id)
+    {
+        LocationData loc = this.Get(location_id);
+        if (loc == null) return 0f;
+
+        List<int> neighbor_ids = new List<int>(loc.connections.Keys);
+        int count = neighbor_ids.Count;
+        if (count == 0) return 0f;
+
+        float sum = 0f;
+        for (int i = 0; i < count; i++)
+        {
+            LocationData neighbor = this.Get(neighbor_ids[i]);
+            if (neighbor != null && neighbor.productivity != null && neighbor.productivity.ContainsKey(item_id))
+            {
+                sum += neighbor.productivity[item_id];
+            }
+        }
+        return sum / count;
+    }
+
+    /// <summary>
+    /// 实时计算指定地点指定物品的 Z2（两步邻居平均生产力，排除本地点和直接邻居）
+    /// </summary>
+    public float GetZ2(int location_id, int item_id)
+    {
+        LocationData loc = this.Get(location_id);
+        if (loc == null) return 0f;
+
+        List<int> neighbor_ids = new List<int>(loc.connections.Keys);
+
+        // 收集两步邻居：邻居的邻居（排除本地点和直接邻居）
+        HashSet<int> two_step_set = new HashSet<int>();
+        for (int i = 0; i < neighbor_ids.Count; i++)
+        {
+            LocationData neighbor = this.Get(neighbor_ids[i]);
+            if (neighbor == null) continue;
+            foreach (int nn_id in neighbor.connections.Keys)
+            {
+                if (nn_id != location_id && !neighbor_ids.Contains(nn_id))
+                {
+                    two_step_set.Add(nn_id);
+                }
+            }
+        }
+
+        List<int> two_step_list = new List<int>(two_step_set);
+        int count = two_step_list.Count;
+        if (count == 0) return 0f;
+
+        float sum = 0f;
+        for (int i = 0; i < count; i++)
+        {
+            LocationData ts = this.Get(two_step_list[i]);
+            if (ts != null && ts.productivity != null && ts.productivity.ContainsKey(item_id))
+            {
+                sum += ts.productivity[item_id];
+            }
+        }
+        return sum / count;
+    }
+
+    /// <summary>
     /// 将一条 JSON 条目解析为 LocationData
     /// </summary>
     private LocationData ParseEntry(LocationDataJSON entry)
@@ -75,14 +140,14 @@ public class LocationDictionary : Singleton<LocationDictionary>
             }
         }
 
-        // 将 price_multipliers 列表转为字典
-        Dictionary<int, float> price_mult_dict = null;
-        if (entry.price_multipliers != null && entry.price_multipliers.Count > 0)
+        // 将 productivity 列表转为字典
+        Dictionary<int, float> prod_dict = null;
+        if (entry.productivity != null && entry.productivity.Count > 0)
         {
-            price_mult_dict = new Dictionary<int, float>();
-            for (int i = 0; i < entry.price_multipliers.Count; i++)
+            prod_dict = new Dictionary<int, float>();
+            for (int i = 0; i < entry.productivity.Count; i++)
             {
-                price_mult_dict[entry.price_multipliers[i].item_id] = entry.price_multipliers[i].value;
+                prod_dict[entry.productivity[i].item_id] = entry.productivity[i].value;
             }
         }
 
@@ -92,7 +157,7 @@ public class LocationDictionary : Singleton<LocationDictionary>
             type: location_type,
             connections: conn_dict,
             top_scene_id: entry.top_scene_id,
-            price_multipliers: price_mult_dict
+            productivity: prod_dict
         );
     }
 

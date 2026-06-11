@@ -111,7 +111,8 @@ public class ItemDictionary : Singleton<ItemDictionary>
             effects: effect_dict,
             can_use: entry.can_use,
             can_discard: entry.can_discard,
-            can_trade: entry.can_trade
+            can_trade: entry.can_trade,
+            elasticity: entry.elasticity
         );
     }
 

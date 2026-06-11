@@ -32,7 +32,8 @@ public static class EventManager
         PanelMove.OnSceneChanged += OnSceneChanged;
         PanelMap.OnLocationChanged += OnLocationChanged;
         PanelInventory.OnItemUsed += OnItemUsed;
-        PanelTrade.OnTradeExecuted += OnTradeExecuted;
+        PanelTrade.OnBuyExecuted += OnTradeExecuted;
+        PanelTrade.OnSellExecuted += OnTradeExecuted;
         TimeManager.Instance.OnTimeAdvanced += OnTimeAdvanced;
 
         // 缓存面板引用
@@ -53,7 +54,8 @@ public static class EventManager
         PanelMove.OnSceneChanged -= OnSceneChanged;
         PanelMap.OnLocationChanged -= OnLocationChanged;
         PanelInventory.OnItemUsed -= OnItemUsed;
-        PanelTrade.OnTradeExecuted -= OnTradeExecuted;
+        PanelTrade.OnBuyExecuted -= OnTradeExecuted;
+        PanelTrade.OnSellExecuted -= OnTradeExecuted;
         TimeManager.Instance.OnTimeAdvanced -= OnTimeAdvanced;
 
         panel_player = null;
@@ -102,8 +104,8 @@ public static class EventManager
 
     private static void OnTimeAdvanced()
     {
-        // 世界演化：角色状态衰减
-        WorldSimulator.OnTimeAdvanced();
+        // 世界演化：角色状态衰减 + 商店补货
+        WorldSimulator.Instance.OnTimeAdvanced();
 
         // 刷新所有面板
         RefreshAllPanels();

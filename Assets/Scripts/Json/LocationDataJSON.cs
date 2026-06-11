@@ -12,10 +12,10 @@ public class ConnectionJSON
 }
 
 /// <summary>
-/// JSON反序列化辅助类——价格乘数条目（某物品ID的买入价格乘数）
+/// JSON反序列化辅助类——生产力条目（某物品ID的生产力系数）
 /// </summary>
 [Serializable]
-public class PriceMultiplierJSON
+public class ProductivityJSON
 {
     public int item_id;
     public float value;
@@ -32,7 +32,7 @@ public class LocationDataJSON
     public string type;                         // 字符串，解析时转为 LocationTypeEnum
     public int top_scene_id;
     public List<ConnectionJSON> connections;     // 可选，无则为null
-    public List<PriceMultiplierJSON> price_multipliers; // 可选，价格乘数列表
+    public List<ProductivityJSON> productivity; // 可选，生产力系数列表
 }
 
 /// <summary>
