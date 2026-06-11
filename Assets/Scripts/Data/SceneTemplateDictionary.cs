@@ -35,12 +35,31 @@ public class SceneTemplateDictionary : Singleton<SceneTemplateDictionary>
             SceneTemplateData template = new SceneTemplateData(
                 id: entry.id,
                 name: entry.name,
-                action_ids: entry.action_ids
+                action_ids: entry.action_ids,
+                trade_types: ParseTradeTypes(entry.trade_types)
             );
             this.all_templates[template.id] = template;
         }
 
         Debug.Log("SceneTemplateDictionary: 从 SceneTemplates.json 加载了 " + this.all_templates.Count + " 个模板");
+    }
+
+    // 将 JSON 中的 trade_types 字符串列表解析为 ItemTypeEnum 列表
+    private List<ItemSubTypeEnum> ParseTradeTypes(List<string> typeNames)
+    {
+        if (typeNames == null || typeNames.Count == 0)
+        {
+            return null;
+        }
+
+        List<ItemSubTypeEnum> types = new List<ItemSubTypeEnum>();
+        for (int i = 0; i < typeNames.Count; i++)
+        {
+            ItemSubTypeEnum parsed = (ItemSubTypeEnum)0;
+            System.Enum.TryParse(typeNames[i], out parsed);
+            types.Add(parsed);
+        }
+        return types;
     }
 
     /// <summary>

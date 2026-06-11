@@ -30,6 +30,9 @@ public class ActionEffectContext
     // AdvanceTime 参数：推进的时段数（正数=向后推进）
     public int advance_slots;
 
+    // OpenPanel 交易相关参数：true=买入模式, false=卖出模式
+    public bool trade_is_buy;
+
     // 执行成功后输出的日志文字（可选，为空则不输出）
     public string log_message;
 

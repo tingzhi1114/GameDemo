@@ -1,5 +1,3 @@
-using System;
-
 /// <summary>
 /// 时间管理器——负责游戏内年/月/日/时段的推进
 /// 每天6个时段：深夜/凌晨/上午/中午/下午/晚上
@@ -17,9 +15,9 @@ public class TimeManager : Singleton<TimeManager>
     public TimePeriodEnum current_period;
 
     /// <summary>
-    /// 每推进一个时段时触发，供其他模块监听
+    /// 每推进一个时段后触发，供 EventManager 和 WorldSimulator 订阅
     /// </summary>
-    public event Action OnTimeAdvanced;
+    public event System.Action OnTimeAdvanced;
 
     private TimeManager()
     {

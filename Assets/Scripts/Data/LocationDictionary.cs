@@ -75,12 +75,24 @@ public class LocationDictionary : Singleton<LocationDictionary>
             }
         }
 
+        // 将 price_multipliers 列表转为字典
+        Dictionary<int, float> price_mult_dict = null;
+        if (entry.price_multipliers != null && entry.price_multipliers.Count > 0)
+        {
+            price_mult_dict = new Dictionary<int, float>();
+            for (int i = 0; i < entry.price_multipliers.Count; i++)
+            {
+                price_mult_dict[entry.price_multipliers[i].item_id] = entry.price_multipliers[i].value;
+            }
+        }
+
         return new LocationData(
             id: entry.id,
             name: entry.name,
             type: location_type,
             connections: conn_dict,
-            top_scene_id: entry.top_scene_id
+            top_scene_id: entry.top_scene_id,
+            price_multipliers: price_mult_dict
         );
     }
 

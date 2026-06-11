@@ -15,14 +15,17 @@ public class LocationData
     public Dictionary<int, int> connections;
     // 进入该地点后的顶级场景ID
     public int top_scene_id;
+    // 价格乘数（key=物品ID, value=买入价格乘数）
+    public Dictionary<int, float> price_multipliers;
 
-    public LocationData(int id, string name, LocationTypeEnum type, Dictionary<int, int> connections, int top_scene_id = -1)
+    public LocationData(int id, string name, LocationTypeEnum type, Dictionary<int, int> connections, int top_scene_id = -1, Dictionary<int, float> price_multipliers = null)
     {
         this.id = id;
         this.name = name;
         this.type = type;
         this.connections = connections;
         this.top_scene_id = top_scene_id;
+        this.price_multipliers = price_multipliers;
     }
 
     /// <summary>

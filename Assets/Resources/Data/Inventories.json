@@ -1,0 +1,15 @@
+{
+  "inventories": [
+    {
+      "character_id": 1,
+      "items": [
+        { "item_id": 1, "count": 5 },
+        { "item_id": 3, "count": 2 },
+        { "item_id": 7, "count": 1 },
+        { "item_id": 10, "count": 20 },
+        { "item_id": 12, "count": 15 },
+        { "item_id": 17, "count": 3 }
+      ]
+    }
+  ]
+}

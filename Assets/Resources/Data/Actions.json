@@ -4,22 +4,21 @@
       "id": 1,
       "name": "购买交易品",
       "effects": [
-        { "type": "ModifyMoney", "money_change": -20 }
+        { "type": "OpenPanel", "panel_name": "Panel_Trade", "trade_is_buy": true }
       ]
     },
     {
       "id": 2,
       "name": "贩卖交易品",
       "effects": [
-        { "type": "ModifyMoney", "money_change": 25 }
+        { "type": "OpenPanel", "panel_name": "Panel_Trade", "trade_is_buy": false }
       ]
     },
     {
       "id": 3,
       "name": "用膳",
       "effects": [
-        { "type": "ModifyMoney", "money_change": -5 },
-        { "type": "ModifyStatus", "fullness_change": 30 }
+        { "type": "OpenPanel", "panel_name": "Panel_Trade", "trade_is_buy": true }
       ]
     },
     {

@@ -92,6 +92,7 @@ public class ActionDictionary : Singleton<ActionDictionary>
             context.event_id = entry.event_id;
             context.log_message = entry.log_message;
             context.advance_slots = entry.advance_slots;
+            context.trade_is_buy = entry.trade_is_buy;
 
             // 解析属性变化列表（如果有）
             if (entry.attribute_changes != null && entry.attribute_changes.Count > 0)

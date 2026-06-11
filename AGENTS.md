@@ -31,6 +31,8 @@
 - 方法、枚举、类等大结  使用大驼峰，如 `GenerateTurnResources()`、`TakeDamage()`
 - 参数使用小驼峰，如`currentHp`
 - 不使用大蛇形
+- **常量也使用小蛇形**：`sell_rate`、`grade_names` 等，不使用 `SELL_RATE`、`GRADE_NAMES` 这种大蛇形
+- 全局常量统一放在 `Assets/Scripts/Core/Config.cs` + `Assets/Resources/Data/Config.json` 中管理
 - **代码中不允许出现中文字符（注释除外）**。枚举值、字符串字面量等均使用英文。
 - **枚举值需要同行注释**：每个枚举值在同一行末尾添加 `// 中文说明` 注释。
 - **构造函数必须使用 this.xx = xx 形式**，不接受无参构造函数（除非有特殊理由）。外部构造时必须传入所有参数，不允许有默认值。

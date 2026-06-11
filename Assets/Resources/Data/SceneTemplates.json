@@ -3,12 +3,14 @@
     {
       "id": 1,
       "name": "市集",
-      "action_ids": [1, 2]
+      "action_ids": [1, 2],
+      "trade_types": ["Grain", "Cloth", "Lumber", "Ore", "Herb", "Tea", "Porcelain", "Jewel"]
     },
     {
       "id": 2,
       "name": "客栈",
-      "action_ids": [3, 4, 5]
+      "action_ids": [3, 4, 5],
+      "trade_types": ["Food", "Drink"]
     },
     {
       "id": 3,

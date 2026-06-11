@@ -10,7 +10,7 @@ public static class LoseItemAE
     /// </summary>
     public static bool Execute(CharacterData character, ActionEffectContext context)
     {
-        character.RemoveItem(context.item_id, context.item_count);
+        InventoryDictionary.Instance.GetOrCreate(character.id).RemoveItem(context.item_id, context.item_count);
 
         // 输出日志（如果有）
         if (!string.IsNullOrEmpty(context.log_message))

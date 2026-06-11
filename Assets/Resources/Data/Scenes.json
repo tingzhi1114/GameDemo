@@ -14,7 +14,19 @@
       "name": "市集",
       "parent_scene_id": 1,
       "template_id": 1,
-      "children_ids": null
+      "children_ids": null,
+      "goods": [
+        { "item_id": 10, "target": 20 },
+        { "item_id": 11, "target": 15 },
+        { "item_id": 12, "target": 20 },
+        { "item_id": 13, "target": 10 },
+        { "item_id": 14, "target": 15 },
+        { "item_id": 15, "target": 20 },
+        { "item_id": 16, "target": 20 },
+        { "item_id": 17, "target": 8 },
+        { "item_id": 18, "target": 6 },
+        { "item_id": 19, "target": 3 }
+      ]
     },
     {
       "id": 3,
@@ -22,7 +34,13 @@
       "name": "客栈",
       "parent_scene_id": 1,
       "template_id": 2,
-      "children_ids": null
+      "children_ids": null,
+      "goods": [
+        { "item_id": 1, "target": 20 },
+        { "item_id": 3, "target": 15 },
+        { "item_id": 7, "target": 10 },
+        { "item_id": 9, "target": 15 }
+      ]
     },
     {
       "id": 4,
@@ -46,7 +64,19 @@
       "name": "市集",
       "parent_scene_id": 5,
       "template_id": 1,
-      "children_ids": null
+      "children_ids": null,
+      "goods": [
+        { "item_id": 10, "target": 20 },
+        { "item_id": 11, "target": 15 },
+        { "item_id": 12, "target": 20 },
+        { "item_id": 13, "target": 10 },
+        { "item_id": 14, "target": 15 },
+        { "item_id": 15, "target": 20 },
+        { "item_id": 16, "target": 20 },
+        { "item_id": 17, "target": 8 },
+        { "item_id": 18, "target": 6 },
+        { "item_id": 19, "target": 3 }
+      ]
     },
     {
       "id": 7,
@@ -54,7 +84,13 @@
       "name": "客栈",
       "parent_scene_id": 5,
       "template_id": 2,
-      "children_ids": null
+      "children_ids": null,
+      "goods": [
+        { "item_id": 1, "target": 20 },
+        { "item_id": 3, "target": 15 },
+        { "item_id": 7, "target": 10 },
+        { "item_id": 9, "target": 15 }
+      ]
     },
     {
       "id": 8,

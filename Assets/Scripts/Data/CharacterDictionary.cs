@@ -97,6 +97,14 @@ public class CharacterDictionary : Singleton<CharacterDictionary>
     }
 
     /// <summary>
+    /// 获取所有角色的枚举器
+    /// </summary>
+    public Dictionary<int, CharacterData>.ValueCollection GetAll()
+    {
+        return this.all_characters.Values;
+    }
+
+    /// <summary>
     /// 添加一个角色到字典中，自动分配自增ID
     /// </summary>
     public int Add(CharacterData character)

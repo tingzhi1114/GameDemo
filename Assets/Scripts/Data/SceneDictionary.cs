@@ -34,13 +34,21 @@ public class SceneDictionary : Singleton<SceneDictionary>
         for (int i = 0; i < database.scenes.Count; i++)
         {
             SceneDataJSON entry = database.scenes[i];
+
+            // 解析商品数据，同时得到库存字典和期望库存字典
+            Dictionary<int, Dictionary<ItemData, int>> inv = null;
+            Dictionary<int, int> target = null;
+            ParseGoods(entry.goods, out inv, out target);
+
             SceneData scene = new SceneData(
                 id: entry.id,
                 location_id: entry.location_id,
                 name: entry.name,
                 parent_scene_id: entry.parent_scene_id,
                 template_id: entry.template_id,
-                children_ids: entry.children_ids
+                children_ids: entry.children_ids,
+                inventory: inv,
+                target_stock: target
             );
             this.all_scenes[scene.id] = scene;
         }
@@ -57,6 +65,41 @@ public class SceneDictionary : Singleton<SceneDictionary>
         this.next_id = max_id + 1;
 
         Debug.Log("SceneDictionary: 从 Scenes.json 加载了 " + this.all_scenes.Count + " 个场景");
+    }
+
+    // 将 JSON 中的 goods 列表解析为商店库存字典 + 期望库存字典
+    private void ParseGoods(List<SceneGoodsJSON> goods, out Dictionary<int, Dictionary<ItemData, int>> inventory, out Dictionary<int, int> targetStock)
+    {
+        inventory = null;
+        targetStock = null;
+
+        if (goods == null || goods.Count == 0)
+        {
+            return;
+        }
+
+        inventory = new Dictionary<int, Dictionary<ItemData, int>>();
+        targetStock = new Dictionary<int, int>();
+
+        for (int i = 0; i < goods.Count; i++)
+        {
+            int item_id = goods[i].item_id;
+            int target_qty = goods[i].target;
+
+            ItemData template = ItemDictionary.Instance.Get(item_id);
+            if (template == null)
+            {
+                continue;
+            }
+
+            // 初始化库存到目标数量
+            Dictionary<ItemData, int> inner = new Dictionary<ItemData, int>();
+            inner[template] = target_qty;
+            inventory[item_id] = inner;
+
+            // 记录期望库存
+            targetStock[item_id] = target_qty;
+        }
     }
 
     /// <summary>

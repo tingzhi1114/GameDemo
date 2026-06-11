@@ -29,6 +29,7 @@ public class ActionEffectJSON
     public string panel_name;
     public int event_id;
     public int advance_slots;
+    public bool trade_is_buy;
     public string log_message;
     public List<AttributeChangeJSON> attribute_changes;
 }

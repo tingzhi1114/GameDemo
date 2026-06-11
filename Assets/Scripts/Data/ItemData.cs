@@ -13,6 +13,8 @@ public class ItemData
     public string description;
     // 物品类型
     public ItemTypeEnum type;
+    // 物品子类型
+    public ItemSubTypeEnum sub_type;
     // 品级（1=仙一品 ~ 9=劣九品）
     public int grade;
     // 基础价格（买入/卖出的基准价）
@@ -38,6 +40,7 @@ public class ItemData
         string name,
         string description,
         ItemTypeEnum type,
+        ItemSubTypeEnum sub_type,
         int grade,
         int base_value,
         int max_stack,
@@ -52,6 +55,7 @@ public class ItemData
         this.name = name;
         this.description = description;
         this.type = type;
+        this.sub_type = sub_type;
         this.grade = grade;
         this.base_value = base_value;
         this.max_stack = max_stack;
@@ -60,6 +64,45 @@ public class ItemData
         this.can_use = can_use;
         this.can_discard = can_discard;
         this.can_trade = can_trade;
+    }
+
+    /// <summary>
+    /// 根据物品子类型获取对应的大类
+    /// </summary>
+    public static ItemTypeEnum GetMainType(ItemSubTypeEnum subType)
+    {
+        // 消耗品子类
+        if (subType == ItemSubTypeEnum.Food
+            || subType == ItemSubTypeEnum.Drink
+            || subType == ItemSubTypeEnum.Medicine
+            || subType == ItemSubTypeEnum.Tonic)
+        {
+            return ItemTypeEnum.Consumable;
+        }
+
+        // 器具子类
+        if (subType == ItemSubTypeEnum.FarmTool
+            || subType == ItemSubTypeEnum.FishTool
+            || subType == ItemSubTypeEnum.Cookware
+            || subType == ItemSubTypeEnum.HandTool)
+        {
+            return ItemTypeEnum.Tool;
+        }
+
+        // 交易品子类
+        if (subType == ItemSubTypeEnum.Grain
+            || subType == ItemSubTypeEnum.Cloth
+            || subType == ItemSubTypeEnum.Lumber
+            || subType == ItemSubTypeEnum.Ore
+            || subType == ItemSubTypeEnum.Herb
+            || subType == ItemSubTypeEnum.Tea
+            || subType == ItemSubTypeEnum.Porcelain
+            || subType == ItemSubTypeEnum.Jewel)
+        {
+            return ItemTypeEnum.TradeGood;
+        }
+
+        return ItemTypeEnum.Special;
     }
 
     /// <summary>
@@ -94,6 +137,7 @@ public class ItemData
             name: this.name,
             description: this.description,
             type: this.type,
+            sub_type: this.sub_type,
             grade: this.grade,
             base_value: this.base_value,
             max_stack: this.max_stack,

@@ -8,6 +8,9 @@ public class GameTest : MonoBehaviour
 {
     private void Awake()
     {
+        // 按依赖顺序初始化所有数据
+        Bootstrap.Initialize();
+
         // 设置玩家ID
         Player.Instance.character_id = 1;
 
@@ -25,6 +28,8 @@ public class GameTest : MonoBehaviour
         {
             player.current_location_id = 1;
             player.current_scene_id = 1;
+            // 初始金钱改为 1000000，方便测试
+            player.money = 1000000;
         }
 
         // 将玩家加入当前场景的角色列表
@@ -42,51 +47,34 @@ public class GameTest : MonoBehaviour
         }
 
         // 首次刷新所有面板
-        PanelTitle panel_title = FindObjectOfType<PanelTitle>();
+        PanelTitle panel_title = FindObjectOfType<PanelTitle>(true);
         if (panel_title != null)
         {
             panel_title.Refresh();
         }
 
-        PanelPlayer panel_player = FindObjectOfType<PanelPlayer>();
+        PanelPlayer panel_player = FindObjectOfType<PanelPlayer>(true);
         if (panel_player != null)
         {
             panel_player.Refresh();
         }
 
-        PanelAction panel_action = FindObjectOfType<PanelAction>();
+        PanelAction panel_action = FindObjectOfType<PanelAction>(true);
         if (panel_action != null)
         {
             panel_action.Refresh();
         }
 
-        PanelMove panel_move = FindObjectOfType<PanelMove>();
+        PanelMove panel_move = FindObjectOfType<PanelMove>(true);
         if (panel_move != null)
         {
             panel_move.Refresh();
         }
 
-        PanelCharacter panel_character = FindObjectOfType<PanelCharacter>();
+        PanelCharacter panel_character = FindObjectOfType<PanelCharacter>(true);
         if (panel_character != null)
         {
             panel_character.Refresh();
-        }
-
-        // 给玩家添加测试物品
-        if (player != null)
-        {
-            // 粗粮饼·九品(id=1) × 5
-            player.AddItem(1, 5);
-            // 阳春面·九品(id=3) × 2
-            player.AddItem(3, 2);
-            // 浊酒·九品(id=7) × 1
-            player.AddItem(7, 1);
-            // 大米(id=10) × 20
-            player.AddItem(10, 20);
-            // 木材(id=12) × 15
-            player.AddItem(12, 15);
-            // 丝绸(id=17) × 3
-            player.AddItem(17, 3);
         }
 
         Debug.Log("玩家已进入锦安城");

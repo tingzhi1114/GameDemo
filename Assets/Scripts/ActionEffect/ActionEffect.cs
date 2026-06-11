@@ -74,7 +74,7 @@ public class ActionEffect : Singleton<ActionEffect>
         }
         else if (type == ActionEffectTypeEnum.OpenPanel)
         {
-            return OpenPanelAE.Execute(context);
+            return OpenPanelAE.Execute(context, character);
         }
         else if (type == ActionEffectTypeEnum.TriggerEvent)
         {

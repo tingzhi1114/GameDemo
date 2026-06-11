@@ -42,21 +42,29 @@ public class PanelInventory : MonoBehaviour
     private Color original_filter_color;
 
     // 品级中文名（index 0=仙一品 ... index 8=劣九品）
-    private static readonly string[] GRADE_NAMES = {
+    private static readonly string[] grade_names = {
         "仙一品", "神二品", "灵三品", "绝四品", "卓五品",
         "精六品", "良七品", "凡八品", "劣九品"
     };
 
     // 类型中文名（与 ItemTypeEnum 顺序一致）
-    private static readonly string[] TYPE_NAMES = {
+    private static readonly string[] type_names = {
         "消耗品", "器具", "衣物", "书籍",
         "收集品", "材料", "交易品", "特殊"
     };
 
     // 效果中文名（与 ItemEffectType 顺序一致）
-    private static readonly string[] EFFECT_NAMES = {
+    private static readonly string[] effect_names = {
         "金钱", "健康", "精力", "饱腹",
         "力量", "敏捷", "才智", "魅力", "体魄", "气运"
+    };
+
+    // 子类型中文名（与 ItemSubTypeEnum 顺序一致）
+    private static readonly string[] sub_type_names = {
+        "食物", "饮品", "药品", "补品",
+        "农具", "渔具", "炊具", "工具",
+        "粮", "布", "木材", "矿产",
+        "药材", "茶", "瓷器", "珠宝"
     };
 
     private void Awake()
@@ -191,7 +199,7 @@ public class PanelInventory : MonoBehaviour
         }
 
         // 遍历背包外层字典（item_id → inner dict）
-        foreach (KeyValuePair<int, Dictionary<ItemData, int>> outer_kv in player.inventory)
+        foreach (KeyValuePair<int, Dictionary<ItemData, int>> outer_kv in InventoryDictionary.Instance.GetOrCreate(player.id).items)
         {
             int item_id = outer_kv.Key;
             ItemData template = ItemDictionary.Instance.Get(item_id);
@@ -206,52 +214,51 @@ public class PanelInventory : MonoBehaviour
                 continue;
             }
 
-            Dictionary<ItemData, int> inner = outer_kv.Value;
-
-            foreach (KeyValuePair<ItemData, int> inner_kv in inner)
+            // 统计该物品的总数
+            int count = 0;
+            foreach (int cnt in outer_kv.Value.Values)
             {
-                ItemData instance = inner_kv.Key;
-                int count = inner_kv.Value;
-
-                // 实例化预制体
-                GameObject btn_obj = Instantiate(button_item_prefab, content);
-                btn_obj.name = "Button_Item_" + template.name;
-
-                // 设置各文本
-                TextMeshProUGUI text_name = btn_obj.transform.Find("Text_Name").GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI text_grade = btn_obj.transform.Find("Text_Grade").GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI text_type = btn_obj.transform.Find("Text_Type").GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI text_num = btn_obj.transform.Find("Text_Num").GetComponent<TextMeshProUGUI>();
-                TextMeshProUGUI text_value = btn_obj.transform.Find("Text_Value").GetComponent<TextMeshProUGUI>();
-
-                text_name.text = template.name;
-                text_grade.text = GetGradeName(template.grade);
-                text_type.text = GetTypeName(template.type);
-
-                if (template.max_stack > 1)
-                {
-                    // 可堆叠：显示数量
-                    text_num.text = "×" + count;
-                    text_value.text = (template.base_value * count).ToString();
-                }
-                else
-                {
-                    // 不可堆叠：不显示数量
-                    text_num.text = "";
-                    text_value.text = template.base_value.ToString();
-                }
-
-                // 绑定点击事件
-                Button btn = btn_obj.GetComponent<Button>();
-                Image img = btn_obj.GetComponent<Image>();
-                int captured_id = item_id;
-                ItemData captured_instance = instance;
-
-                btn.onClick.AddListener(() =>
-                {
-                    OnItemClicked(captured_id, captured_instance, btn, img);
-                });
+                count += cnt;
             }
+
+            // 实例化预制体
+            GameObject btn_obj = Instantiate(button_item_prefab, content);
+            btn_obj.name = "Button_Item_" + template.name;
+
+            // 设置各文本
+            TextMeshProUGUI text_name = btn_obj.transform.Find("Text_Name").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text_grade = btn_obj.transform.Find("Text_Grade").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text_type = btn_obj.transform.Find("Text_Type").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text_num = btn_obj.transform.Find("Text_Num").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text_value = btn_obj.transform.Find("Text_Value").GetComponent<TextMeshProUGUI>();
+
+            text_name.text = template.name;
+            text_grade.text = GetGradeName(template.grade);
+            text_type.text = GetSubTypeName(template.sub_type) + "(" + GetTypeName(template.type) + ")";
+
+            if (template.max_stack > 1)
+            {
+                // 可堆叠：显示数量和总价值
+                text_num.text = "×" + count;
+                text_value.text = (template.base_value * count).ToString();
+            }
+            else
+            {
+                // 不可堆叠：显示单个价值
+                text_num.text = "";
+                text_value.text = template.base_value.ToString();
+            }
+
+            // 绑定点击事件
+            Button btn = btn_obj.GetComponent<Button>();
+            Image img = btn_obj.GetComponent<Image>();
+            int captured_id = item_id;
+            ItemData captured_instance = template;
+
+            btn.onClick.AddListener(() =>
+            {
+                OnItemClicked(captured_id, captured_instance, btn, img);
+            });
         }
     }
 
@@ -260,6 +267,13 @@ public class PanelInventory : MonoBehaviour
     /// </summary>
     private void OnItemClicked(int item_id, ItemData instance, Button button, Image image)
     {
+        // 再次点击已选中的物品 → 取消选中
+        if (selected_item_id == item_id)
+        {
+            DeselectItem();
+            return;
+        }
+
         // 取消上一个选中状态
         DeselectItem();
 
@@ -351,12 +365,12 @@ public class PanelInventory : MonoBehaviour
 
         // 统计背包中该物品总数
         CharacterData player = Player.Instance.GetCharacter();
-        if (player != null && player.inventory.ContainsKey(item_id))
+        if (player != null && InventoryDictionary.Instance.GetOrCreate(player.id).items.ContainsKey(item_id))
         {
             int total = 0;
-            foreach (int cnt in player.inventory[item_id].Values)
+            foreach (int cnt in InventoryDictionary.Instance.GetOrCreate(player.id).items[item_id].Values)
             {
-                total = total + cnt;
+                total += cnt;
             }
             status_text = "持有：" + total + "    " + status_text;
         }
@@ -400,7 +414,7 @@ public class PanelInventory : MonoBehaviour
         }
 
         // 移除一个
-        player.RemoveItem(selected_item_id, 1);
+        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
 
         // 通知其他面板刷新
         if (OnItemUsed != null)
@@ -409,7 +423,7 @@ public class PanelInventory : MonoBehaviour
         }
 
         // 检查是否还有剩余
-        if (player.inventory.ContainsKey(selected_item_id) && player.inventory[selected_item_id].Count > 0)
+        if (InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0)
         {
             // 有剩余：更新选中按钮的数量文本 + 刷新详情，但不重建列表
             UpdateButtonCount(selected_button, selected_item_id);
@@ -510,10 +524,10 @@ public class PanelInventory : MonoBehaviour
             return;
         }
 
-        player.RemoveItem(selected_item_id, 1);
+        InventoryDictionary.Instance.GetOrCreate(player.id).RemoveItem(selected_item_id, 1);
 
         // 检查是否还有剩余
-        if (player.inventory.ContainsKey(selected_item_id) && player.inventory[selected_item_id].Count > 0)
+        if (InventoryDictionary.Instance.GetOrCreate(player.id).GetCount(selected_item_id) > 0)
         {
             // 有剩余：更新选中按钮的数量文本 + 刷新详情，但不重建列表
             UpdateButtonCount(selected_button, selected_item_id);
@@ -539,7 +553,7 @@ public class PanelInventory : MonoBehaviour
         }
 
         CharacterData player = Player.Instance.GetCharacter();
-        if (player == null || !player.inventory.ContainsKey(item_id))
+        if (player == null || !InventoryDictionary.Instance.GetOrCreate(player.id).items.ContainsKey(item_id))
         {
             return;
         }
@@ -547,18 +561,13 @@ public class PanelInventory : MonoBehaviour
         TextMeshProUGUI text_num = button.transform.Find("Text_Num").GetComponent<TextMeshProUGUI>();
         TextMeshProUGUI text_value = button.transform.Find("Text_Value").GetComponent<TextMeshProUGUI>();
 
-        if (template.max_stack > 1)
+        int total = 0;
+        foreach (int cnt in InventoryDictionary.Instance.GetOrCreate(player.id).items[item_id].Values)
         {
-            // 统计该物品的总数
-            int total = 0;
-            foreach (int cnt in player.inventory[item_id].Values)
-            {
-                total = total + cnt;
-            }
-            text_num.text = "×" + total;
-            text_value.text = (template.base_value * total).ToString();
+            total += cnt;
         }
-        // 不可堆叠物品不存在"有剩余"的情况（每个副本 count=1，被移除就没了）
+        text_num.text = "×" + total;
+        text_value.text = (template.base_value * total).ToString();
     }
 
     /// <summary>
@@ -568,7 +577,7 @@ public class PanelInventory : MonoBehaviour
     {
         if (grade >= 1 && grade <= 9)
         {
-            return GRADE_NAMES[grade - 1];
+            return grade_names[grade - 1];
         }
         return "";
     }
@@ -579,9 +588,20 @@ public class PanelInventory : MonoBehaviour
     private string GetTypeName(ItemTypeEnum type)
     {
         int index = (int)type;
-        if (index >= 0 && index < TYPE_NAMES.Length)
+        if (index >= 0 && index < type_names.Length)
         {
-            return TYPE_NAMES[index];
+            return type_names[index];
+        }
+        return "";
+    }
+
+    // 子类型枚举转中文
+    private string GetSubTypeName(ItemSubTypeEnum subType)
+    {
+        int index = (int)subType;
+        if (index >= 0 && index < sub_type_names.Length)
+        {
+            return sub_type_names[index];
         }
         return "";
     }
@@ -592,9 +612,9 @@ public class PanelInventory : MonoBehaviour
     private string GetEffectName(ItemEffectType type)
     {
         int index = (int)type;
-        if (index >= 0 && index < EFFECT_NAMES.Length)
+        if (index >= 0 && index < effect_names.Length)
         {
-            return EFFECT_NAMES[index];
+            return effect_names[index];
         }
         return "";
     }

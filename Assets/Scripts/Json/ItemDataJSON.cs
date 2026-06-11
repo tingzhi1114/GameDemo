@@ -31,6 +31,7 @@ public class ItemDataJSON
     public string name;
     public string description;
     public string type;                     // 字符串，解析时转为 ItemTypeEnum
+    public string sub_type;                 // 字符串，解析时转为 ItemSubTypeEnum
     public int grade;
     public int base_value;
     public int max_stack;

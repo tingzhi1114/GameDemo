@@ -53,6 +53,27 @@ public enum ItemPropertyType
 {
 }
 
+// 物品子类型（按需扩展）
+public enum ItemSubTypeEnum
+{
+    Food,       // 食物
+    Drink,      // 饮品
+    Medicine,   // 药品
+    Tonic,      // 补品
+    FarmTool,   // 农具
+    FishTool,   // 渔具
+    Cookware,   // 炊具
+    HandTool,   // 工具
+    Grain,      // 粮
+    Cloth,      // 布
+    Lumber,     // 木材
+    Ore,        // 矿产
+    Herb,       // 药材
+    Tea,        // 茶
+    Porcelain,  // 瓷器
+    Jewel       // 珠宝
+}
+
 // 行动效果类型（行动可执行的各类原子效果）
 public enum ActionEffectTypeEnum
 {

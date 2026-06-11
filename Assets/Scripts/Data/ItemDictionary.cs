@@ -65,6 +65,13 @@ public class ItemDictionary : Singleton<ItemDictionary>
         ItemTypeEnum item_type = ItemTypeEnum.Special;
         Enum.TryParse(entry.type, out item_type);
 
+        // 将字符串sub_type解析为枚举，解析失败默认Food
+        ItemSubTypeEnum item_sub_type = (ItemSubTypeEnum)0;
+        if (!string.IsNullOrEmpty(entry.sub_type))
+        {
+            Enum.TryParse(entry.sub_type, out item_sub_type);
+        }
+
         // 将 properties 列表转为字典
         Dictionary<ItemPropertyType, float> prop_dict = null;
         if (entry.properties != null && entry.properties.Count > 0)
@@ -96,6 +103,7 @@ public class ItemDictionary : Singleton<ItemDictionary>
             name: entry.name,
             description: entry.description,
             type: item_type,
+            sub_type: item_sub_type,
             grade: entry.grade,
             base_value: entry.base_value,
             max_stack: entry.max_stack,

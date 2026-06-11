@@ -22,4 +22,15 @@ public abstract class Singleton<T> where T : class
             return instance;
         }
     }
+
+    /// <summary>
+    /// 主动触发单例创建，用于在初始化阶段控制创建顺序
+    /// </summary>
+    public static void EnsureCreated()
+    {
+        if (instance == null)
+        {
+            instance = Activator.CreateInstance(typeof(T), nonPublic: true) as T;
+        }
+    }
 }

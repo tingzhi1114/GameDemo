@@ -9,7 +9,8 @@ public class SceneTemplateDataJSON
 {
     public int id;
     public string name;
-    public List<int> action_ids; // 可选，无则为null
+    public List<int> action_ids;    // 可选，无则为null
+    public List<string> trade_types; // 可选，允许交易的物品类型名列表
 }
 
 /// <summary>

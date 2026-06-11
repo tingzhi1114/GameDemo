@@ -10,7 +10,7 @@ public static class GainItemAE
     /// </summary>
     public static bool Execute(CharacterData character, ActionEffectContext context)
     {
-        character.AddItem(context.item_id, context.item_count);
+        InventoryDictionary.Instance.GetOrCreate(character.id).AddItem(context.item_id, context.item_count);
 
         // 输出日志（如果有）
         if (!string.IsNullOrEmpty(context.log_message))
